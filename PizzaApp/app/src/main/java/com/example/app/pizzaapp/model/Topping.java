@@ -3,35 +3,11 @@ package com.example.app.pizzaapp.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.google.gson.annotations.SerializedName;
-
 /**
  * Created by juandiegoGL on 4/6/17.
  */
 
-public class Topping implements Parcelable {
-
-    @SerializedName("topping_id")
-    int mId;
-    @SerializedName("name")
-    String mName;
-
-
-    public int getmId() {
-        return mId;
-    }
-
-    public void setmId(int mId) {
-        this.mId = mId;
-    }
-
-    public String getmName() {
-        return mName;
-    }
-
-    public void setmName(String mName) {
-        this.mName = mName;
-    }
+public class Topping extends Product implements Parcelable {
 
     @Override
     public String toString() {
