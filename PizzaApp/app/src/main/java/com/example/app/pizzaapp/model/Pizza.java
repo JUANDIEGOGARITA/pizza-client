@@ -46,6 +46,7 @@ public class Pizza extends Product implements Parcelable {
     protected Pizza(Parcel in) {
         this.mId = in.readInt();
         this.mName = in.readString();
+        this.mDescription = in.readString();
     }
 
     public static final Parcelable.Creator<Pizza> CREATOR = new Parcelable.Creator<Pizza>() {

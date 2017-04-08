@@ -7,6 +7,10 @@ import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ScrollView;
 
+/**
+ * Created by juandiegoGL on 4/6/17.
+ */
+
 public class OverScrollView extends ScrollView {
 
     public OverScrollView(Context context) {

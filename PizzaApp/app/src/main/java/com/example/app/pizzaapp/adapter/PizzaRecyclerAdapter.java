@@ -10,6 +10,10 @@ import com.example.app.pizzaapp.model.Pizza;
 
 import butterknife.Bind;
 
+/**
+ * Created by juandiegoGL on 4/6/17.
+ */
+
 public class PizzaRecyclerAdapter extends BaseRecyclerAdapter<Pizza> {
 
     @Override

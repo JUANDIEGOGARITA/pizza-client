@@ -1,7 +1,7 @@
 package com.example.app.pizzaapp.datamanager;
 
 /**
- * Created by amorrell on 10/7/15.
+ * Created by juandiegoGL on 4/6/17.
  */
 public interface ServiceCallback<T, E> {
 

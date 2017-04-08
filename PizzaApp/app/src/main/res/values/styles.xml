@@ -34,7 +34,7 @@
 
     <style name="fullScreen">
         <item name="android:fitsSystemWindows">true</item>
-        <item name="android:background">@color/colorPrimary</item>
+        <item name="android:background">@color/almostWhite</item>
     </style>
 
 </resources>

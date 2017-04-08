@@ -1,7 +1,5 @@
 package com.example.app.pizzaapp.model;
 
-import android.os.Parcelable;
-
 import com.google.gson.annotations.SerializedName;
 
 /**

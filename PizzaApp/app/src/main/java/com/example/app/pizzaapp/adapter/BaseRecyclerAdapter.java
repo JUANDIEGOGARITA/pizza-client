@@ -14,6 +14,9 @@ import java.util.List;
 
 import butterknife.ButterKnife;
 
+/**
+ * Created by juandiegoGL on 4/6/17.
+ */
 
 public class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRecyclerAdapter<T>.ViewHolder> {
     private List<T> items = Collections.emptyList();

@@ -2,11 +2,11 @@ package com.example.app.pizzaapp.helper;
 
 import android.animation.Animator;
 import android.app.Activity;
-import android.app.Fragment;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.util.Pair;
 import android.support.v7.app.ActionBarActivity;
 import android.transition.Transition;
@@ -14,10 +14,16 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.Window;
 
+import com.example.app.pizzaapp.receiver.NetworkStateChangeReceiver;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
+
+/**
+ * Created by juandiegoGL on 4/6/17.
+ */
 
 public class TransitionHelper {
 
@@ -278,7 +284,7 @@ public class TransitionHelper {
         }
     }
 
-    public static class BaseFragment extends Fragment implements TransitionHelper.Listener {
+    public static class BaseFragment extends Fragment implements TransitionHelper.Listener, NetworkStateChangeReceiver.InternetStateHasChange {
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
@@ -315,6 +321,11 @@ public class TransitionHelper {
 
         @Override
         public void onBeforeReturn() {
+
+        }
+
+        @Override
+        public void networkChangedState(boolean isInternetAvailable) {
 
         }
     }

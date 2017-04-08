@@ -8,6 +8,9 @@ import android.view.View;
 
 import java.util.UUID;
 
+/**
+ * Created by juandiegoGL on 4/6/17.
+ */
 
 public class BitmapUtil {
     private static LruCache<String, Bitmap> mMemoryCache;

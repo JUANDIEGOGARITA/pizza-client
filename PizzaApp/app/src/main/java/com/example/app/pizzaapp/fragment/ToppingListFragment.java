@@ -1,3 +1,4 @@
+
 package com.example.app.pizzaapp.fragment;
 
 import android.os.Bundle;
@@ -12,11 +13,12 @@ import com.balysv.materialmenu.MaterialMenuDrawable;
 import com.example.app.pizzaapp.R;
 import com.example.app.pizzaapp.activity.MainActivity;
 import com.example.app.pizzaapp.adapter.BaseRecyclerAdapter;
-import com.example.app.pizzaapp.adapter.PizzaRecyclerAdapter;
+import com.example.app.pizzaapp.adapter.ToppingRecyclerAdapter;
 import com.example.app.pizzaapp.datamanager.DataManager;
 import com.example.app.pizzaapp.datamanager.ServiceCallback;
 import com.example.app.pizzaapp.helper.TransitionHelper;
 import com.example.app.pizzaapp.model.Pizza;
+import com.example.app.pizzaapp.model.Topping;
 import com.example.app.pizzaapp.model.ToppingByPizza;
 import com.example.app.pizzaapp.util.Navigator;
 
@@ -30,27 +32,29 @@ import butterknife.ButterKnife;
  * Created by juandiegoGL on 4/6/17.
  */
 
-public class PizzaListFragment extends TransitionHelper.BaseFragment {
+public class ToppingListFragment extends TransitionHelper.BaseFragment {
     @Bind(R.id.recycler)
     RecyclerView recyclerView;
     @Bind(R.id.refresh_layout)
     SwipeRefreshLayout mRefreshLayout;
-    PizzaRecyclerAdapter recyclerAdapter;
+    ToppingRecyclerAdapter recyclerAdapter;
     List<Pizza> pizzas;
 
-    public PizzaListFragment() {
+    public ToppingListFragment() {
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_pizza_list, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_topping_list, container, false);
         ButterKnife.bind(this, rootView);
         initRecyclerView();
-        getThings();
+        loadToppings();
+        MainActivity activity = MainActivity.of(getActivity());
+        activity.homeButton.setVisibility(View.GONE);
         mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-               getThings();
+                loadToppings();
             }
         });
 
@@ -58,15 +62,12 @@ public class PizzaListFragment extends TransitionHelper.BaseFragment {
     }
 
     private void initRecyclerView() {
-        recyclerAdapter = new PizzaRecyclerAdapter();
-        recyclerAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener<Pizza>() {
+        recyclerAdapter = new ToppingRecyclerAdapter();
+        recyclerAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener<String>() {
             @Override
-            public void onItemClick(View view, Pizza item, boolean isLongClick) {
+            public void onItemClick(View view, String item, boolean isLongClick) {
                 if (isLongClick) {
                     MainActivity.of(getActivity()).animateHomeIcon(MaterialMenuDrawable.IconState.X);
-                } else {
-                    loadToppings(view, item);
-
                 }
             }
         });
@@ -82,17 +83,20 @@ public class PizzaListFragment extends TransitionHelper.BaseFragment {
         });
     }
 
-    private void loadToppings(final View view, final Pizza item) {
-        new DataManager(getActivity()).getToppingsByPizzaId(item.getId(), new ServiceCallback() {
+    private void loadToppings() {
+        new DataManager(getActivity()).getToppings(new ServiceCallback() {
             @Override
             public void onSuccess(Object response) {
-                ArrayList<ToppingByPizza> toppingByPizzaList = (ArrayList<ToppingByPizza>) response;
+                if (mRefreshLayout.isRefreshing()) {
+                    mRefreshLayout.setRefreshing(false);
+                }
+                ArrayList<Topping> toppingArrayList = (ArrayList<Topping>) response;
                 ArrayList<String> addyExtras = new ArrayList<String>();
 
-                for (int i = 0; i < toppingByPizzaList.size(); i++) {
-                    addyExtras.add(toppingByPizzaList.get(i).getName());
+                for (int i = 0; i < toppingArrayList.size(); i++) {
+                    addyExtras.add(toppingArrayList.get(i).getName());
                 }
-                Navigator.launchDetail(MainActivity.of(getActivity()), view, item, addyExtras, recyclerView);
+                recyclerAdapter.updateList(addyExtras);
             }
 
             @Override
@@ -113,38 +117,13 @@ public class PizzaListFragment extends TransitionHelper.BaseFragment {
         return super.onBeforeBack();
     }
 
-    public List<Pizza> getThings() {
-        new DataManager(getActivity()).getPizzas(new ServiceCallback() {
-            @Override
-            public void onSuccess(Object response) {
-                if (mRefreshLayout.isRefreshing()) {
-                    mRefreshLayout.setRefreshing(false);
-                }
-                pizzas = (List<Pizza>) response;
-                recyclerAdapter.updateList(pizzas);
-
-            }
-
-            @Override
-            public void onError(Object networkError) {
-                pizzas = null;
-            }
-
-            @Override
-            public void onPreExecute() {
-
-            }
-        });
-        return pizzas;
-    }
 
     @Override
     public void networkChangedState(boolean isInternetAvailable) {
         if (isInternetAvailable) {
-            getThings();
+            loadToppings();
         } else {
             //TODO DISPLAY NO VIEW
         }
     }
 }
-

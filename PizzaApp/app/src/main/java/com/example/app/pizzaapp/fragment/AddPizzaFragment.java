@@ -13,6 +13,8 @@ import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -26,14 +28,18 @@ import com.example.app.pizzaapp.util.Navigator;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class OverlayFragment extends TransitionHelper.BaseFragment {
+/**
+ * Created by juandiegoGL on 4/6/17.
+ */
+
+public class AddPizzaFragment extends TransitionHelper.BaseFragment {
 
     @Bind(R.id.overlay)
     RelativeLayout overlayLayout;
     @Bind(R.id.text_view)
     TextView textView;
 
-    public OverlayFragment() {}
+    public AddPizzaFragment() {}
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -63,8 +69,12 @@ public class OverlayFragment extends TransitionHelper.BaseFragment {
     @Override
     public void onBeforeEnter(View contentView) {
         overlayLayout.setVisibility(View.INVISIBLE);
-        MainActivity.of(getActivity()).setHomeIcon(MaterialMenuDrawable.IconState.BURGER);
+        MainActivity.of(getActivity()).homeButton.setVisibility(View.VISIBLE);
+      //  MainActivity.of(getActivity()).setHomeIcon(MaterialMenuDrawable.IconState.BURGER);
         MainActivity.of(getActivity()).animateHomeIcon(MaterialMenuDrawable.IconState.ARROW);
+      //  Animation shake = AnimationUtils.loadAnimation(getActivity(), R.anim.slide_up_to_hide);
+     //   MainActivity.of(getActivity()).tabBar.startAnimation(shake);
+   //     MainActivity.of(getActivity()).tabBar.setVisibility(View.GONE);
     }
 
     @Override
@@ -75,7 +85,10 @@ public class OverlayFragment extends TransitionHelper.BaseFragment {
     @Override
     public boolean onBeforeBack() {
         animateRevealHide(overlayLayout);
-        MainActivity.of(getActivity()).animateHomeIcon(MaterialMenuDrawable.IconState.BURGER);
+        Animation shake = AnimationUtils.loadAnimation(getActivity(), R.anim.slide_out_left);
+        MainActivity.of(getActivity()).homeButton.startAnimation(shake);
+        MainActivity.of(getActivity()).toolbarTitle.startAnimation(shake);
+
         return false;
     }
 

@@ -2,57 +2,69 @@ package com.example.app.pizzaapp.activity;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.app.FragmentTransaction;
-import android.graphics.drawable.BitmapDrawable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 
 import com.balysv.materialmenu.MaterialMenuDrawable;
 import com.balysv.materialmenu.MaterialMenuView;
 import com.example.app.pizzaapp.R;
-import com.example.app.pizzaapp.datamanager.BaseManager;
-import com.example.app.pizzaapp.datamanager.DataManager;
-import com.example.app.pizzaapp.datamanager.DataManagerInterface;
-import com.example.app.pizzaapp.datamanager.ServiceCallback;
-import com.example.app.pizzaapp.fragment.OverlayFragment;
+import com.example.app.pizzaapp.adapter.TabAdapter;
+import com.example.app.pizzaapp.fragment.AddPizzaFragment;
+import com.example.app.pizzaapp.fragment.PizzaDetailFragment;
 import com.example.app.pizzaapp.fragment.PizzaListFragment;
-import com.example.app.pizzaapp.fragment.ThingDetailFragment;
 import com.example.app.pizzaapp.helper.TransitionHelper;
-import com.example.app.pizzaapp.model.Pizza;
-import com.example.app.pizzaapp.util.BitmapUtil;
-
-import java.util.List;
+import com.example.app.pizzaapp.receiver.NetworkStateChangeReceiver;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
-public class MainActivity extends TransitionHelper.BaseActivity  {
+/**
+ * Created by juandiegoGL on 4/6/17.
+ */
+public class MainActivity extends TransitionHelper.BaseActivity implements NetworkStateChangeReceiver.InternetStateHasChange {
 
     protected static String BASE_FRAGMENT = "base_fragment";
-    public @Bind(R.id.toolbar)
+    public
+    @Bind(R.id.toolbar)
     Toolbar toolbar;
-    public @Bind(R.id.material_menu_button)
+
+    public
+    @Bind(R.id.tab_layout)
+    TabLayout tabBar;
+    public
+    @Bind(R.id.material_menu_button)
     MaterialMenuView homeButton;
-    public @Bind(R.id.toolbar_title)
+    public
+    @Bind(R.id.toolbar_title)
     TextView toolbarTitle;
-    public @Bind(R.id.fab)
-    Button fab;
-    public @Bind(R.id.drawerLayout)
-    DrawerLayout drawerLayout;
-    public @Bind(R.id.base_fragment_background)
+    public
+    @Bind(R.id.fab)
+    FloatingActionButton fab;
+
+    public
+    @Bind(R.id.base_fragment_background)
     View fragmentBackround;
+
+    public
+    @Bind(R.id.pager)
+    ViewPager pager;
+
+    TabAdapter pagerAdapter;
+
+    @Bind(R.id.base_fragment_container)
+    CoordinatorLayout full_screen;
+
+    private NetworkStateChangeReceiver networkStateChangeReceiver;
+    private Snackbar snackbar;
 
 
     @Override
@@ -60,8 +72,66 @@ public class MainActivity extends TransitionHelper.BaseActivity  {
         super.onCreate(savedInstanceState);
         setContentView(getLayoutResource());
         ButterKnife.bind(this);
+        //initBaseFragment(savedInstanceState);
+        networkStateChangeReceiver = new NetworkStateChangeReceiver();
+        networkStateChangeReceiver.setInternetStateHasChange(this);
+        snackbar = Snackbar.make(full_screen, getString(R.string.lost_internet_connection),
+                Snackbar.LENGTH_INDEFINITE).setAction("", null);
+        tabBar.addTab(tabBar.newTab().setText("Pizzas"));
+        tabBar.addTab(tabBar.newTab().setText("Toppings"));
+        tabBar.setTabGravity(TabLayout.GRAVITY_FILL);
+
         initToolbar();
-        initBaseFragment(savedInstanceState);
+        pagerAdapter = new TabAdapter(getSupportFragmentManager(), 2);
+        pager.setAdapter(pagerAdapter);
+
+        pager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabBar));
+        tabBar.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                pager.setCurrentItem(tab.getPosition());
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
+        initMainView(savedInstanceState);
+    }
+
+    private void initMainView(Bundle savedInstanceState) {
+        TransitionHelper.BaseFragment fragment = null;
+        if (savedInstanceState == null) {
+            fragment = getBaseFragment();
+        }
+         setBaseFragment(fragment);
+    }
+
+    protected TransitionHelper.BaseFragment getBaseFragment() {
+        int fragmentResourceId = getIntent().getIntExtra("fragment_resource_id", 0);
+        switch (fragmentResourceId) {
+            case R.layout.fragment_pizza_list:
+                return new PizzaListFragment();
+            case R.layout.fragment_pizza_detail:
+                return PizzaDetailFragment.create();
+            case R.layout.fragment_overaly:
+                return new AddPizzaFragment();
+            default:
+                return null;
+        }
+    }
+
+    public void setBaseFragment(TransitionHelper.BaseFragment fragment) {
+        if (fragment == null) return;
+       FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.base_fragment, fragment);
+        transaction.commit();
     }
 
     private void initToolbar() {
@@ -78,46 +148,13 @@ public class MainActivity extends TransitionHelper.BaseActivity  {
         }
     }
 
-    private void initBaseFragment(Bundle savedInstanceState) {
-        //apply background bitmap if we have one
-        if (getIntent().hasExtra("bitmap_id")) {
-            fragmentBackround.setBackground(new BitmapDrawable(getResources(), BitmapUtil.fetchBitmapFromIntent(getIntent())));
-        }
-
-        Fragment fragment = null;
-        if (savedInstanceState != null) {
-            fragment = getFragmentManager().findFragmentByTag(BASE_FRAGMENT);
-        }
-        if (fragment == null) fragment = getBaseFragment();
-        setBaseFragment(fragment);
-    }
 
     protected int getLayoutResource() {
         return R.layout.activity_main;
-    };
-
-    protected Fragment getBaseFragment() {
-        int fragmentResourceId = getIntent().getIntExtra("fragment_resource_id", R.layout.fragment_pizza_list);
-        switch (fragmentResourceId) {
-            case R.layout.fragment_pizza_list:
-            default:
-                return new PizzaListFragment();
-            case R.layout.fragment_pizza_detail:
-                return ThingDetailFragment.create();
-            case R.layout.fragment_overaly:
-                return new OverlayFragment();
-        }
     }
-
-    public void setBaseFragment(Fragment fragment) {
-        if (fragment == null) return;
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.replace(R.id.base_fragment, fragment, BASE_FRAGMENT);
-        transaction.commit();
-    }
-
 
     private MaterialMenuDrawable.IconState currentIconState;
+
     public boolean animateHomeIcon(MaterialMenuDrawable.IconState iconState) {
         if (currentIconState == iconState) return false;
         currentIconState = iconState;
@@ -140,5 +177,26 @@ public class MainActivity extends TransitionHelper.BaseActivity  {
 
     public static MainActivity of(Activity activity) {
         return (MainActivity) activity;
+    }
+
+    @Override
+    public void networkChangedState(boolean isInternetAvailable) {
+        if (isInternetAvailable) {
+            if (snackbar.isShown()) {
+                snackbar.dismiss();
+            }
+        } else {
+            snackbar.show();
+
+        }
+     /*   TransitionHelper.BaseFragment page = (TransitionHelper.BaseFragment)
+                getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.pager + ":" + pager.getCurrentItem());
+        page.networkChangedState(isInternetAvailable);*/
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(networkStateChangeReceiver);
     }
 }
