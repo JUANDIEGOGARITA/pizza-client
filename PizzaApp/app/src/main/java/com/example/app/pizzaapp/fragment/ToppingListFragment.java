@@ -17,13 +17,10 @@ import com.example.app.pizzaapp.adapter.ToppingRecyclerAdapter;
 import com.example.app.pizzaapp.datamanager.DataManager;
 import com.example.app.pizzaapp.datamanager.ServiceCallback;
 import com.example.app.pizzaapp.helper.TransitionHelper;
-import com.example.app.pizzaapp.model.Pizza;
 import com.example.app.pizzaapp.model.Topping;
-import com.example.app.pizzaapp.model.ToppingByPizza;
 import com.example.app.pizzaapp.util.Navigator;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -38,7 +35,6 @@ public class ToppingListFragment extends TransitionHelper.BaseFragment {
     @Bind(R.id.refresh_layout)
     SwipeRefreshLayout mRefreshLayout;
     ToppingRecyclerAdapter recyclerAdapter;
-    List<Pizza> pizzas;
 
     public ToppingListFragment() {
     }

@@ -1,28 +1,28 @@
 package com.example.app.pizzaapp.activity;
 
 import android.app.Activity;
-import android.app.Fragment;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.ViewPager;
+import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.widget.TextView;
 
 import com.balysv.materialmenu.MaterialMenuDrawable;
 import com.balysv.materialmenu.MaterialMenuView;
 import com.example.app.pizzaapp.R;
-import com.example.app.pizzaapp.adapter.TabAdapter;
 import com.example.app.pizzaapp.fragment.AddPizzaFragment;
+import com.example.app.pizzaapp.fragment.HomeFragment;
 import com.example.app.pizzaapp.fragment.PizzaDetailFragment;
 import com.example.app.pizzaapp.fragment.PizzaListFragment;
+import com.example.app.pizzaapp.fragment.ToppingListFragment;
 import com.example.app.pizzaapp.helper.TransitionHelper;
 import com.example.app.pizzaapp.receiver.NetworkStateChangeReceiver;
+import com.example.app.pizzaapp.util.BitmapUtil;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -32,20 +32,16 @@ import butterknife.ButterKnife;
  */
 public class MainActivity extends TransitionHelper.BaseActivity implements NetworkStateChangeReceiver.InternetStateHasChange {
 
-    protected static String BASE_FRAGMENT = "base_fragment";
     public
     @Bind(R.id.toolbar)
     Toolbar toolbar;
 
     public
-    @Bind(R.id.tab_layout)
-    TabLayout tabBar;
-    public
     @Bind(R.id.material_menu_button)
     MaterialMenuView homeButton;
     public
     @Bind(R.id.toolbar_title)
-    TextView toolbarTitle;
+    AppCompatTextView toolbarTitle;
     public
     @Bind(R.id.fab)
     FloatingActionButton fab;
@@ -54,11 +50,6 @@ public class MainActivity extends TransitionHelper.BaseActivity implements Netwo
     @Bind(R.id.base_fragment_background)
     View fragmentBackround;
 
-    public
-    @Bind(R.id.pager)
-    ViewPager pager;
-
-    TabAdapter pagerAdapter;
 
     @Bind(R.id.base_fragment_container)
     CoordinatorLayout full_screen;
@@ -72,45 +63,25 @@ public class MainActivity extends TransitionHelper.BaseActivity implements Netwo
         super.onCreate(savedInstanceState);
         setContentView(getLayoutResource());
         ButterKnife.bind(this);
-        //initBaseFragment(savedInstanceState);
+        ;
+        initToolbar();
         networkStateChangeReceiver = new NetworkStateChangeReceiver();
         networkStateChangeReceiver.setInternetStateHasChange(this);
         snackbar = Snackbar.make(full_screen, getString(R.string.lost_internet_connection),
                 Snackbar.LENGTH_INDEFINITE).setAction("", null);
-        tabBar.addTab(tabBar.newTab().setText("Pizzas"));
-        tabBar.addTab(tabBar.newTab().setText("Toppings"));
-        tabBar.setTabGravity(TabLayout.GRAVITY_FILL);
 
-        initToolbar();
-        pagerAdapter = new TabAdapter(getSupportFragmentManager(), 2);
-        pager.setAdapter(pagerAdapter);
-
-        pager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabBar));
-        tabBar.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                pager.setCurrentItem(tab.getPosition());
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-
-            }
-        });
         initMainView(savedInstanceState);
     }
 
     private void initMainView(Bundle savedInstanceState) {
+        if (getIntent().hasExtra("bitmap_id")) {
+            fragmentBackround.setBackground(new BitmapDrawable(getResources(), BitmapUtil.fetchBitmapFromIntent(getIntent())));
+        }
         TransitionHelper.BaseFragment fragment = null;
         if (savedInstanceState == null) {
             fragment = getBaseFragment();
         }
-         setBaseFragment(fragment);
+        setBaseFragment(fragment);
     }
 
     protected TransitionHelper.BaseFragment getBaseFragment() {
@@ -122,14 +93,16 @@ public class MainActivity extends TransitionHelper.BaseActivity implements Netwo
                 return PizzaDetailFragment.create();
             case R.layout.fragment_overaly:
                 return new AddPizzaFragment();
+            case R.layout.fragment_topping_list:
+                return new ToppingListFragment();
             default:
-                return null;
+                return new HomeFragment();
         }
     }
 
     public void setBaseFragment(TransitionHelper.BaseFragment fragment) {
         if (fragment == null) return;
-       FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.base_fragment, fragment);
         transaction.commit();
     }
@@ -198,5 +171,12 @@ public class MainActivity extends TransitionHelper.BaseActivity implements Netwo
     public void onDestroy() {
         super.onDestroy();
         unregisterReceiver(networkStateChangeReceiver);
+    }
+
+
+    //Getters
+
+    public FloatingActionButton getFabButton() {
+        return fab;
     }
 }

@@ -1,61 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.example.app.pizzaapp.view.OverScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/overscroll_view"
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/detail_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_gravity="center"
-    android:overScrollMode="never">
+    android:layout_marginBottom="1dp"
+    android:layout_marginTop="1dp"
+    android:background="#2e2e2e"
+    android:foreground="?android:attr/selectableItemBackground"
+    card_view:cardCornerRadius="0dp"
+    card_view:cardElevation="2dp">
 
-    <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/detail_layout"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="1dp"
-        android:layout_marginTop="1dp"
-        android:background="@android:color/white"
-        android:foreground="?android:attr/selectableItemBackground"
-        card_view:cardCornerRadius="0dp"
-        card_view:cardElevation="2dp">
+        android:background="#2e2e2e">
 
-        <RelativeLayout
+        <LinearLayout
+            android:id="@+id/pizza_details"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:background="#2e2e2e"
+            android:orientation="vertical"
+            android:padding="20dp">
 
-            <LinearLayout
-                android:id="@+id/pizza_details"
+            <TextView
+                android:id="@+id/detail_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="#FFFFFF"
-                android:orientation="vertical"
-                android:padding="20dp">
+                android:fontFamily="sans-serif-light"
+                android:text="Description"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:textColor="@android:color/white" />
 
-                <TextView
-                    android:id="@+id/detail_title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-light"
-                    android:text="Thing"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+            <TextView
+                android:id="@+id/detail_body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-light"
+                android:lineSpacingMultiplier="1.2"
+                android:paddingTop="8dp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:textColor="@android:color/white" />
+        </LinearLayout>
 
 
-                <TextView
-                    android:id="@+id/detail_body"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-light"
-                    android:lineSpacingMultiplier="1.2"
-                    android:paddingTop="8dp"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
-            </LinearLayout>
+        <com.example.app.pizzaapp.view.CustonSwipeRefreshLayout
+            android:id="@+id/refresh_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/pizza_details">
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/recycler"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_below="@+id/pizza_details"
+                android:background="@color/almostWhite"
                 android:scrollbars="vertical" />
 
-        </RelativeLayout>
-    </android.support.v7.widget.CardView>
+        </com.example.app.pizzaapp.view.CustonSwipeRefreshLayout>
 
-</com.example.app.pizzaapp.view.OverScrollView>
+    </RelativeLayout>
+
+</android.support.v7.widget.CardView>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.AppBarLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/toolbar_container"
     android:layout_width="match_parent"
@@ -12,7 +12,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:minHeight="0dp"
-            app:theme="@style/Toolbar"></android.support.v7.widget.Toolbar>
+            app:theme="@style/Toolbar">
 
         <LinearLayout
             android:id="@+id/toolbar_icon"
@@ -32,7 +32,7 @@
                 app:mm_strokeWidth="2"
                 app:mm_transformDuration="1000" />
 
-            <TextView
+            <android.support.v7.widget.AppCompatTextView
                 android:id="@+id/toolbar_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -43,5 +43,6 @@
                 android:textColor="@android:color/white"
                 android:textStyle="bold" />
         </LinearLayout>
+        </android.support.v7.widget.Toolbar>
 
-</RelativeLayout>
+</android.support.design.widget.AppBarLayout>

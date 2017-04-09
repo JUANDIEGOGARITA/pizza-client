@@ -1,5 +1,6 @@
 package com.example.app.pizzaapp.adapter;
 
+import android.support.v7.widget.AppCompatTextView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +25,7 @@ public class PizzaRecyclerAdapter extends BaseRecyclerAdapter<Pizza> {
 
     public class PizzaHolder extends BaseRecyclerAdapter<Pizza>.ViewHolder {
         @Bind(R.id.title)
-        TextView titleTextView;
+        AppCompatTextView titleTextView;
         @Bind(R.id.description)
         TextView descriptionView;
 

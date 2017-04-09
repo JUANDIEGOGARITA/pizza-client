@@ -13,8 +13,6 @@ import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -39,7 +37,8 @@ public class AddPizzaFragment extends TransitionHelper.BaseFragment {
     @Bind(R.id.text_view)
     TextView textView;
 
-    public AddPizzaFragment() {}
+    public AddPizzaFragment() {
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -53,12 +52,12 @@ public class AddPizzaFragment extends TransitionHelper.BaseFragment {
         textView.setText("v1.0.0");
         textView.setAlpha(0);
         textView.setTranslationY(100);
-        new Handler().postDelayed(new Runnable(){
+        new Handler().postDelayed(new Runnable() {
             public void run() {
                 textView.animate()
                         .alpha(1)
-                        .setStartDelay(Navigator.ANIM_DURATION/3)
-                        .setDuration(Navigator.ANIM_DURATION*5)
+                        .setStartDelay(Navigator.ANIM_DURATION / 3)
+                        .setDuration(Navigator.ANIM_DURATION * 5)
                         .setInterpolator(new DecelerateInterpolator(9))
                         .translationY(0)
                         .start();
@@ -70,11 +69,8 @@ public class AddPizzaFragment extends TransitionHelper.BaseFragment {
     public void onBeforeEnter(View contentView) {
         overlayLayout.setVisibility(View.INVISIBLE);
         MainActivity.of(getActivity()).homeButton.setVisibility(View.VISIBLE);
-      //  MainActivity.of(getActivity()).setHomeIcon(MaterialMenuDrawable.IconState.BURGER);
+        MainActivity.of(getActivity()).setHomeIcon(MaterialMenuDrawable.IconState.BURGER);
         MainActivity.of(getActivity()).animateHomeIcon(MaterialMenuDrawable.IconState.ARROW);
-      //  Animation shake = AnimationUtils.loadAnimation(getActivity(), R.anim.slide_up_to_hide);
-     //   MainActivity.of(getActivity()).tabBar.startAnimation(shake);
-   //     MainActivity.of(getActivity()).tabBar.setVisibility(View.GONE);
     }
 
     @Override
@@ -84,10 +80,8 @@ public class AddPizzaFragment extends TransitionHelper.BaseFragment {
 
     @Override
     public boolean onBeforeBack() {
+        MainActivity.of(getActivity()).animateHomeIcon(MaterialMenuDrawable.IconState.ARROW);
         animateRevealHide(overlayLayout);
-        Animation shake = AnimationUtils.loadAnimation(getActivity(), R.anim.slide_out_left);
-        MainActivity.of(getActivity()).homeButton.startAnimation(shake);
-        MainActivity.of(getActivity()).toolbarTitle.startAnimation(shake);
 
         return false;
     }
@@ -142,8 +136,8 @@ public class AddPizzaFragment extends TransitionHelper.BaseFragment {
 
     public void animateRevealShow(View viewRoot) {
         View fab = MainActivity.of(getActivity()).fab;
-        int cx = fab.getLeft() + (fab.getWidth()/2); //middle of button
-        int cy = fab.getTop() + (fab.getHeight()/2); //middle of button
+        int cx = fab.getLeft() + (fab.getWidth() / 2); //middle of button
+        int cy = fab.getTop() + (fab.getHeight() / 2); //middle of button
         int radius = (int) Math.sqrt(Math.pow(cx, 2) + Math.pow(cy, 2)); //hypotenuse to top left
 
         Animator anim = ViewAnimationUtils.createCircularReveal(viewRoot, cx, cy, 0, radius);
@@ -157,8 +151,8 @@ public class AddPizzaFragment extends TransitionHelper.BaseFragment {
 
     public void animateRevealHide(final View viewRoot) {
         View fab = MainActivity.of(getActivity()).fab;
-        int cx = fab.getLeft() + (fab.getWidth()/2); //middle of button
-        int cy = fab.getTop() + (fab.getHeight()/2); //middle of button
+        int cx = fab.getLeft() + (fab.getWidth() / 2); //middle of button
+        int cy = fab.getTop() + (fab.getHeight() / 2); //middle of button
         int radius = (int) Math.sqrt(Math.pow(cx, 2) + Math.pow(cy, 2)); //hypotenuse to top left
 
         Animator anim = ViewAnimationUtils.createCircularReveal(viewRoot, cx, cy, radius, 0);
@@ -179,7 +173,7 @@ public class AddPizzaFragment extends TransitionHelper.BaseFragment {
         colorAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animator) {
-                overlayLayout.setBackgroundColor((Integer)animator.getAnimatedValue());
+                overlayLayout.setBackgroundColor((Integer) animator.getAnimatedValue());
             }
 
         });

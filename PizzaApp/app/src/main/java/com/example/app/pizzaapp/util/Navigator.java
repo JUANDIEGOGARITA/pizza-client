@@ -2,7 +2,6 @@ package com.example.app.pizzaapp.util;
 
 
 import android.content.Intent;
-import android.os.Parcelable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.util.Pair;
@@ -14,10 +13,8 @@ import com.example.app.pizzaapp.R;
 import com.example.app.pizzaapp.activity.MainActivity;
 import com.example.app.pizzaapp.helper.TransitionHelper;
 import com.example.app.pizzaapp.model.Pizza;
-import com.example.app.pizzaapp.model.ToppingByPizza;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by juandiegoGL on 4/6/17.
@@ -31,11 +28,13 @@ public class Navigator {
                                     View backgroundView) {
         ViewCompat.setTransitionName(fromView, "detail_element");
         ViewCompat.setTransitionName(fromActivity.findViewById(R.id.fab), "fab");
+        ViewCompat.setTransitionName(fromView.findViewById(R.id.title), "detail_title");
         ActivityOptionsCompat options =
                 TransitionHelper.makeOptionsCompat(
                         fromActivity,
                         Pair.create(fromView, "detail_element"),
-                        Pair.create(fromActivity.findViewById(R.id.fab), "fab")
+                        Pair.create(fromActivity.findViewById(R.id.fab), "fab"),
+                        Pair.create(fromView.findViewById(R.id.title), "detail_title")
                 );
         Intent intent = new Intent(fromActivity, MainActivity.class);
         intent.putExtra("item_text", item.getName());
@@ -45,7 +44,8 @@ public class Navigator {
         intent.putStringArrayListExtra("list", toppingByPizzaList);
         intent.putExtra("fragment_resource_id", R.layout.fragment_pizza_detail);
 
-        if (backgroundView != null) BitmapUtil.storeBitmapInIntent(BitmapUtil.createBitmap(backgroundView), intent);
+        if (backgroundView != null)
+            BitmapUtil.storeBitmapInIntent(BitmapUtil.createBitmap(backgroundView), intent);
 
         ActivityCompat.startActivity(fromActivity, intent, options.toBundle());
 
@@ -60,11 +60,29 @@ public class Navigator {
         Intent intent = new Intent(fromActivity, MainActivity.class);
         intent.putExtra("fragment_resource_id", R.layout.fragment_overaly);
 
-        if (backgroundView != null) BitmapUtil.storeBitmapInIntent(BitmapUtil.createBitmap(backgroundView), intent);
+        if (backgroundView != null)
+            BitmapUtil.storeBitmapInIntent(BitmapUtil.createBitmap(backgroundView), intent);
 
         ActivityCompat.startActivity(fromActivity, intent, options.toBundle());
 
         fromActivity.overridePendingTransition(R.anim.slide_up, R.anim.scale_down);
     }
 
+    public static void launchList(MainActivity fromActivity, String title, View fromView, int a, int b, int c, int layout) {
+        ViewCompat.setTransitionName(fromView, "title_element");
+        ActivityOptionsCompat options =
+                TransitionHelper.makeOptionsCompat(
+                        fromActivity,
+                        Pair.create(fromView, "title_element")
+                );
+        Intent intent = new Intent(fromActivity, MainActivity.class);
+        intent.putExtra("item_text", title);
+        intent.putExtra("fragment_resource_id", layout);
+        intent.putExtra("a", a);
+        intent.putExtra("b", b);
+        intent.putExtra("c", c);
+
+        ActivityCompat.startActivity(fromActivity, intent, options.toBundle());
+        fromActivity.overridePendingTransition(R.anim.slide_up, R.anim.scale_down);
+    }
 }
