@@ -3,9 +3,13 @@ package com.example.app.pizzaapp.adapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import com.example.app.pizzaapp.R;
+import com.example.app.pizzaapp.fragment.CheckListener;
+import com.example.app.pizzaapp.model.Topping;
 
 import butterknife.Bind;
 
@@ -13,7 +17,18 @@ import butterknife.Bind;
  * Created by juandiegoGL on 4/8/17.
  */
 
-public class ToppingRecyclerAdapter extends BaseRecyclerAdapter<String> {
+public class ToppingRecyclerAdapter extends BaseRecyclerAdapter<Topping> {
+
+    boolean mIsCheckAvailable = false;
+    CheckListener mListener;
+    public ToppingRecyclerAdapter(CheckListener listener, boolean isCheckAvailable){
+        this.mIsCheckAvailable = isCheckAvailable;
+        this.mListener = listener;
+    }
+
+    public ToppingRecyclerAdapter(){
+
+    }
 
     @Override
     public ToppingHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -21,16 +36,31 @@ public class ToppingRecyclerAdapter extends BaseRecyclerAdapter<String> {
         return new ToppingHolder(view);
     }
 
-    public class ToppingHolder extends BaseRecyclerAdapter<String>.ViewHolder {
+    public class ToppingHolder extends BaseRecyclerAdapter<Topping>.ViewHolder {
         @Bind(R.id.title)
-        TextView titleTextView;
+        TextView mTitle;
+        @Bind(R.id.check)
+        CheckBox mCheck;
 
         public ToppingHolder(View itemView) {
             super(itemView);
         }
 
-        public void populate(String item) {
-            titleTextView.setText(item);
+        public void populate(final Topping item) {
+            mTitle.setText(item.getName());
+            if(mIsCheckAvailable){
+                mCheck.setVisibility(View.VISIBLE);
+            }
+            mCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                    if(b){
+                        mListener.onToppingChecked(Integer.parseInt(item.getId()));
+                    }else{
+                        mListener.onToppingUnChecked(Integer.parseInt(item.getId()));
+                    }
+                }
+            });
         }
     }
 }

@@ -9,7 +9,7 @@ import com.google.gson.annotations.SerializedName;
  * Created by juandiegoGL on 4/8/17.
  */
 
-public class ToppingByPizza extends Topping implements Parcelable {
+public class GetToppingByPizzaResult extends Topping implements Parcelable {
 
     @SerializedName("pizza_id")
     int mPizzaId;
@@ -19,7 +19,7 @@ public class ToppingByPizza extends Topping implements Parcelable {
 
     @Override
     public String toString() {
-        return "ToppingByPizza{" +
+        return "GetToppingByPizzaResult{" +
                 "mId=" + mId +
                 "mName=" + mName +
                 "mPizzaId=" + mPizzaId +
@@ -46,27 +46,27 @@ public class ToppingByPizza extends Topping implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         super.writeToParcel(parcel, i);
-        parcel.writeInt(this.mId);
+        parcel.writeString(this.mId);
         parcel.writeString(this.mName);
         parcel.writeInt(this.mPizzaId);
         parcel.writeInt(mToppingId);
     }
 
-    protected ToppingByPizza(Parcel in) {
+    protected GetToppingByPizzaResult(Parcel in) {
         super(in);
         this.mPizzaId = in.readInt();
         this.mToppingId = in.readInt();
     }
 
-    public static final Parcelable.Creator<ToppingByPizza> CREATOR = new Parcelable.Creator<ToppingByPizza>() {
+    public static final Parcelable.Creator<GetToppingByPizzaResult> CREATOR = new Parcelable.Creator<GetToppingByPizzaResult>() {
         @Override
-        public ToppingByPizza createFromParcel(Parcel source) {
-            return new ToppingByPizza(source);
+        public GetToppingByPizzaResult createFromParcel(Parcel source) {
+            return new GetToppingByPizzaResult(source);
         }
 
         @Override
-        public ToppingByPizza[] newArray(int size) {
-            return new ToppingByPizza[size];
+        public GetToppingByPizzaResult[] newArray(int size) {
+            return new GetToppingByPizzaResult[size];
         }
     };
 }

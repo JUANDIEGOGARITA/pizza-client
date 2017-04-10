@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.Window;
 
+import com.example.app.pizzaapp.activity.MainActivity;
 import com.example.app.pizzaapp.receiver.NetworkStateChangeReceiver;
 
 import java.util.ArrayList;
@@ -327,6 +328,14 @@ public class TransitionHelper {
         @Override
         public void networkChangedState(boolean isInternetAvailable) {
 
+        }
+
+        public boolean isInternetAvailable() {
+            boolean result = false;
+            if (MainActivity.of(getActivity()).getNetworkStateChangeReceiver().isNetworkAvailable(getActivity())) {
+                result = true;
+            }
+            return result;
         }
     }
 }

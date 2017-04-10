@@ -9,15 +9,15 @@ import com.google.gson.annotations.SerializedName;
 public abstract class Product {
 
     @SerializedName("id")
-    int mId;
+    String mId;
     @SerializedName("name")
     String mName;
 
-    public int getId() {
+    public String getId() {
         return mId;
     }
 
-    public void setId(int mId) {
+    public void setId(String mId) {
         this.mId = mId;
     }
 

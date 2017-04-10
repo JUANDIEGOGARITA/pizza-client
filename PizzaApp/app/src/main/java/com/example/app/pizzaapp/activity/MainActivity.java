@@ -16,6 +16,7 @@ import com.balysv.materialmenu.MaterialMenuDrawable;
 import com.balysv.materialmenu.MaterialMenuView;
 import com.example.app.pizzaapp.R;
 import com.example.app.pizzaapp.fragment.AddPizzaFragment;
+import com.example.app.pizzaapp.fragment.AddToppingFragment;
 import com.example.app.pizzaapp.fragment.HomeFragment;
 import com.example.app.pizzaapp.fragment.PizzaDetailFragment;
 import com.example.app.pizzaapp.fragment.PizzaListFragment;
@@ -31,6 +32,8 @@ import butterknife.ButterKnife;
  * Created by juandiegoGL on 4/6/17.
  */
 public class MainActivity extends TransitionHelper.BaseActivity implements NetworkStateChangeReceiver.InternetStateHasChange {
+
+    protected static String BASE_FRAGMENT = "base_fragment";
 
     public
     @Bind(R.id.toolbar)
@@ -95,6 +98,8 @@ public class MainActivity extends TransitionHelper.BaseActivity implements Netwo
                 return new AddPizzaFragment();
             case R.layout.fragment_topping_list:
                 return new ToppingListFragment();
+            case R.layout.fragment_add_topping:
+                return new AddToppingFragment();
             default:
                 return new HomeFragment();
         }
@@ -103,7 +108,7 @@ public class MainActivity extends TransitionHelper.BaseActivity implements Netwo
     public void setBaseFragment(TransitionHelper.BaseFragment fragment) {
         if (fragment == null) return;
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.base_fragment, fragment);
+        transaction.replace(R.id.base_fragment, fragment, BASE_FRAGMENT);
         transaction.commit();
     }
 
@@ -121,6 +126,9 @@ public class MainActivity extends TransitionHelper.BaseActivity implements Netwo
         }
     }
 
+    public void setToolbarTitleText(String text){
+        toolbarTitle.setText(text);
+    }
 
     protected int getLayoutResource() {
         return R.layout.activity_main;
@@ -162,9 +170,8 @@ public class MainActivity extends TransitionHelper.BaseActivity implements Netwo
             snackbar.show();
 
         }
-     /*   TransitionHelper.BaseFragment page = (TransitionHelper.BaseFragment)
-                getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.pager + ":" + pager.getCurrentItem());
-        page.networkChangedState(isInternetAvailable);*/
+         TransitionHelper.BaseFragment fragment = (TransitionHelper.BaseFragment) getSupportFragmentManager().findFragmentByTag(BASE_FRAGMENT);
+        fragment.networkChangedState(isInternetAvailable);
     }
 
     @Override
@@ -174,9 +181,20 @@ public class MainActivity extends TransitionHelper.BaseActivity implements Netwo
     }
 
 
+    public void goBack(){
+        onBackPressed();
+    }
     //Getters
 
     public FloatingActionButton getFabButton() {
         return fab;
+    }
+
+    public NetworkStateChangeReceiver getNetworkStateChangeReceiver() {
+        return networkStateChangeReceiver;
+    }
+
+    public Snackbar getSnackbar() {
+        return snackbar;
     }
 }

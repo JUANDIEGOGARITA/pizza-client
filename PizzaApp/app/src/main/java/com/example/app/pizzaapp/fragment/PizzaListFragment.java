@@ -15,10 +15,9 @@ import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.balysv.materialmenu.MaterialMenuDrawable;
 import com.example.app.pizzaapp.R;
@@ -29,10 +28,8 @@ import com.example.app.pizzaapp.datamanager.DataManager;
 import com.example.app.pizzaapp.datamanager.ServiceCallback;
 import com.example.app.pizzaapp.helper.TransitionHelper;
 import com.example.app.pizzaapp.model.Pizza;
-import com.example.app.pizzaapp.model.ToppingByPizza;
 import com.example.app.pizzaapp.util.Navigator;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.Bind;
@@ -45,16 +42,31 @@ import butterknife.ButterKnife;
 public class PizzaListFragment extends TransitionHelper.BaseFragment {
     @Bind(R.id.recycler)
     RecyclerView recyclerView;
+
     @Bind(R.id.refresh_layout)
     SwipeRefreshLayout mRefreshLayout;
+
     @Bind(R.id.main_view)
     RelativeLayout main_view;
+
+    @Bind(R.id.empty_view)
+    RelativeLayout empty_view;
+
+    @Bind(R.id.error_message)
+    TextView error_message;
+
     PizzaRecyclerAdapter recyclerAdapter;
-    List<Pizza> pizzas;
 
     int a, b, c;
+
     public PizzaListFragment() {
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -65,14 +77,12 @@ public class PizzaListFragment extends TransitionHelper.BaseFragment {
         b = getActivity().getIntent().getIntExtra("b", 0);
         c = getActivity().getIntent().getIntExtra("c", 0);
         initRecyclerView();
-        getThings();
 
-
-        ((MainActivity)getActivity()).toolbarTitle.setText(itemDescription);
+        ((MainActivity) getActivity()).toolbarTitle.setText(itemDescription);
         mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-               getThings();
+                loadPizzas();
             }
         });
         initBodyText();
@@ -82,12 +92,12 @@ public class PizzaListFragment extends TransitionHelper.BaseFragment {
     private void initBodyText() {
         recyclerView.setAlpha(0);
         recyclerView.setTranslationY(100);
-        new Handler().postDelayed(new Runnable(){
+        new Handler().postDelayed(new Runnable() {
             public void run() {
                 recyclerView.animate()
                         .alpha(1)
-                        .setStartDelay(Navigator.ANIM_DURATION/3)
-                        .setDuration(Navigator.ANIM_DURATION*5)
+                        .setStartDelay(Navigator.ANIM_DURATION / 3)
+                        .setDuration(Navigator.ANIM_DURATION * 5)
                         .setInterpolator(new DecelerateInterpolator(9))
                         .translationY(0)
                         .start();
@@ -103,8 +113,7 @@ public class PizzaListFragment extends TransitionHelper.BaseFragment {
                 if (isLongClick) {
                     MainActivity.of(getActivity()).animateHomeIcon(MaterialMenuDrawable.IconState.X);
                 } else {
-                    loadToppings(view, item);
-
+                    Navigator.launchDetail(MainActivity.of(getActivity()), view, item, recyclerView);
                 }
             }
         });
@@ -120,34 +129,9 @@ public class PizzaListFragment extends TransitionHelper.BaseFragment {
         });
     }
 
-    private void loadToppings(final View view, final Pizza item) {
-        new DataManager(getActivity()).getToppingsByPizzaId(item.getId(), new ServiceCallback() {
-            @Override
-            public void onSuccess(Object response) {
-                ArrayList<ToppingByPizza> toppingByPizzaList = (ArrayList<ToppingByPizza>) response;
-                ArrayList<String> addyExtras = new ArrayList<String>();
-
-                for (int i = 0; i < toppingByPizzaList.size(); i++) {
-                    addyExtras.add(toppingByPizzaList.get(i).getName());
-                }
-                Navigator.launchDetail(MainActivity.of(getActivity()), view, item, addyExtras, recyclerView);
-            }
-
-            @Override
-            public void onError(Object networkError) {
-
-            }
-
-            @Override
-            public void onPreExecute() {
-
-            }
-        });
-    }
-
     @Override
     public void onBeforeViewShows(View contentView) {
-        ViewCompat.setTransitionName(((MainActivity)getActivity()).toolbarTitle, "title_element");
+        ViewCompat.setTransitionName(((MainActivity) getActivity()).toolbarTitle, "title_element");
         TransitionHelper.excludeEnterTarget(getActivity(), R.id.toolbar_container, true);
         TransitionHelper.excludeEnterTarget(getActivity(), R.id.full_screen, true);
 
@@ -192,7 +176,7 @@ public class PizzaListFragment extends TransitionHelper.BaseFragment {
         colorAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animator) {
-                main_view.setBackgroundColor((Integer)animator.getAnimatedValue());
+                main_view.setBackgroundColor((Integer) animator.getAnimatedValue());
             }
 
         });
@@ -209,38 +193,58 @@ public class PizzaListFragment extends TransitionHelper.BaseFragment {
         MainActivity.of(getActivity()).animateHomeIcon(MaterialMenuDrawable.IconState.ARROW);
     }
 
-    public List<Pizza> getThings() {
-        new DataManager(getActivity()).getPizzas(new ServiceCallback() {
-            @Override
-            public void onSuccess(Object response) {
-                if (mRefreshLayout.isRefreshing()) {
-                    mRefreshLayout.setRefreshing(false);
+    public void loadPizzas() {
+        if (isInternetAvailable()) {
+            mRefreshLayout.setRefreshing(true);
+            List<Pizza> pizzas = null;
+            new DataManager(getActivity()).getPizzas(new ServiceCallback() {
+                @Override
+                public void onSuccess(Object response) {
+                    if (mRefreshLayout.isRefreshing()) {
+                        mRefreshLayout.setRefreshing(false);
+                    }
+                    if (empty_view.getVisibility() == View.VISIBLE) {
+                        empty_view.setVisibility(View.GONE);
+                        recyclerView.setVisibility(View.VISIBLE);
+                    }
+                    recyclerAdapter.updateList((List<Pizza>) response);
                 }
-                pizzas = (List<Pizza>) response;
-                recyclerAdapter.updateList(pizzas);
 
-            }
+                @Override
+                public void onError(Object networkError) {
+                    showEmptyView(networkError.toString());
+                }
 
-            @Override
-            public void onError(Object networkError) {
-                pizzas = null;
-            }
+                @Override
+                public void onPreExecute() {
 
-            @Override
-            public void onPreExecute() {
+                }
+            });
+        } else {
 
-            }
-        });
-        return pizzas;
+        }
+    }
+
+    private void showEmptyView(String message) {
+        recyclerView.setVisibility(View.GONE);
+        empty_view.setVisibility(View.VISIBLE);
+        error_message.setText(message);
     }
 
     @Override
     public void networkChangedState(boolean isInternetAvailable) {
         if (isInternetAvailable) {
-            getThings();
+            loadPizzas();
+          // TODO ANIMATE THIS PART, REPLACE ANIMATION
+            //  animateRevealShow(main_view);
         } else {
-            //TODO DISPLAY NO VIEW
+            showEmptyView("No internet connection available");
+            MainActivity.of(getActivity()).getSnackbar().setAction("Retry", new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    loadPizzas();
+                }
+            });
         }
     }
 }
-

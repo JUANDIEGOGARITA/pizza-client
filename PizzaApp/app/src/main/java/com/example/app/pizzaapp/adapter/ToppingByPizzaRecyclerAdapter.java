@@ -6,7 +6,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.app.pizzaapp.R;
-import com.example.app.pizzaapp.model.ToppingByPizza;
 
 import butterknife.Bind;
 

@@ -5,30 +5,39 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="0dp"
-    android:layout_marginEnd="8dp"
-    android:layout_marginStart="8dp"
-    android:layout_marginTop="8dp"
+    android:layout_marginEnd="10dp"
+    android:layout_marginStart="10dp"
+    android:layout_marginTop="10dp"
     android:background="@drawable/item_background"
     android:foreground="?android:attr/selectableItemBackground"
     card_view:cardCornerRadius="2dp"
     android:padding="20dp"
     card_view:cardElevation="1dp">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:background="#2e2e2e"
-        android:padding="20dp">
+        android:padding="20dp"
+        android:background="#2e2e2e">
 
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:id="@+id/check"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10dp"
+            android:visibility="gone"
+            android:layout_height="wrap_content" />
         <TextView
             android:id="@+id/title"
+            android:layout_toRightOf="@+id/check"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-light"
             android:text="title"
+            android:layout_centerVertical="true"
             android:textColor="@android:color/white"
             android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
-    </LinearLayout>
+    </RelativeLayout>
 </android.support.v7.widget.CardView>
