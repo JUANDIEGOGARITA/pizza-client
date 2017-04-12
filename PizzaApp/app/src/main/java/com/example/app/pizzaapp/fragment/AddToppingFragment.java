@@ -25,7 +25,6 @@ import com.example.app.pizzaapp.R;
 import com.example.app.pizzaapp.activity.MainActivity;
 import com.example.app.pizzaapp.datamanager.DataManager;
 import com.example.app.pizzaapp.datamanager.ServiceCallback;
-import com.example.app.pizzaapp.util.TransitionUtil;
 import com.example.app.pizzaapp.model.PostTopping;
 import com.example.app.pizzaapp.model.Topping;
 import com.example.app.pizzaapp.util.AppContants;
@@ -33,6 +32,7 @@ import com.example.app.pizzaapp.util.DialogUtil;
 import com.example.app.pizzaapp.util.DialogUtilListener;
 import com.example.app.pizzaapp.util.EditTextValidator;
 import com.example.app.pizzaapp.util.Navigator;
+import com.example.app.pizzaapp.util.TransitionUtil;
 
 import java.util.List;
 
@@ -156,7 +156,6 @@ public class AddToppingFragment extends TransitionUtil.BaseFragment {
             return false;
         }
     }
-
 
     private void showErrorDialog(String errorMessage) {
         DialogUtil.showErrorDialog(mDialogListener, getActivity(), errorMessage);

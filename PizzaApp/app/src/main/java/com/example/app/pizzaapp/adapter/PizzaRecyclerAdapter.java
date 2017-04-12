@@ -29,7 +29,7 @@ public class PizzaRecyclerAdapter extends BaseRecyclerAdapter<Pizza> {
         @Bind(R.id.title)
         AppCompatTextView titleTextView;
         @Bind(R.id.description)
-        TextView descriptionView;
+        AppCompatTextView descriptionView;
 
         public PizzaHolder(View itemView) {
             super(itemView);

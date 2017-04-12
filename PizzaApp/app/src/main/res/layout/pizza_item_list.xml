@@ -15,38 +15,46 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
         android:background="#2e2e2e"
-        android:paddingTop="20dp"
+        android:orientation="vertical"
         android:paddingBottom="20dp"
-        android:paddingLeft="20dp" >
+        android:paddingLeft="20dp"
+        android:paddingTop="20dp">
 
-    <android.support.v7.widget.AppCompatTextView
-            android:id="@+id/title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@android:color/white"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium.Inverse"
-            android:textStyle="bold"/>
-
-        <TextView
-            android:id="@+id/description"
+        <LinearLayout
+            android:id="@+id/text_item"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-light"
-            android:lineSpacingMultiplier="1.2"
-            android:layout_below="@+id/title"
+            android:layout_centerVertical="true"
             android:layout_marginRight="40dp"
-            android:textColor="@android:color/white"
-            android:text="Shiny, shiny pants and bleach-blond hair, a double kick drum by the river in the summer" />
+            android:orientation="vertical">
+
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium.Inverse"
+                android:textColor="@android:color/white"
+                android:textStyle="bold" />
+
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/title"
+                android:fontFamily="sans-serif-light"
+                android:lineSpacingMultiplier="1.2"
+                android:textColor="@android:color/white" />
+
+        </LinearLayout>
 
         <ImageView
-            android:layout_alignRight="@+id/description"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
             android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
             android:layout_marginRight="5dp"
-            android:src="@mipmap/ic_go"/>
+            android:src="@mipmap/ic_go" />
     </RelativeLayout>
+
 </android.support.v7.widget.CardView>

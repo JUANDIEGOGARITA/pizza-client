@@ -1,6 +1,7 @@
 package com.example.app.pizzaapp.fragment;
 
 
+import android.animation.Animator;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.view.ViewCompat;
@@ -11,6 +12,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
@@ -25,11 +27,11 @@ import com.example.app.pizzaapp.activity.MainActivity;
 import com.example.app.pizzaapp.adapter.ToppingRecyclerAdapter;
 import com.example.app.pizzaapp.datamanager.DataManager;
 import com.example.app.pizzaapp.datamanager.ServiceCallback;
-import com.example.app.pizzaapp.util.TransitionUtil;
 import com.example.app.pizzaapp.model.GetToppingByPizzaResult;
 import com.example.app.pizzaapp.model.Topping;
 import com.example.app.pizzaapp.util.AppContants;
 import com.example.app.pizzaapp.util.Navigator;
+import com.example.app.pizzaapp.util.TransitionUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -215,9 +217,7 @@ public class PizzaDetailFragment extends TransitionUtil.BaseFragment implements 
     public void onBeforeViewShows(View contentView) {
         ViewCompat.setTransitionName(detail_layout, "detail_element");
         ViewCompat.setTransitionName(MainActivity.of(getActivity()).getFabButton(), "fab");
-        // ViewCompat.setTransitionName(getActivity().findViewById(R.id.fab), "fab");
         ViewCompat.setTransitionName(((MainActivity) getActivity()).getToolbarTitle(), "detail_title");
-        // MainActivity.of(getActivity()).fab.setTranslationY(400);
 
         TransitionUtil.excludeEnterTarget(getActivity(), R.id.toolbar_container, true);
         TransitionUtil.excludeEnterTarget(getActivity(), R.id.full_screen, true);
@@ -226,6 +226,7 @@ public class PizzaDetailFragment extends TransitionUtil.BaseFragment implements 
 
     @Override
     public void onBeforeEnter(View contentView) {
+       // detail_layout.setVisibility(View.INVISIBLE);
         MainActivity.of(getActivity()).getFragmentBackround().animate().scaleX(.92f).scaleY(.92f).alpha(.6f).setDuration(Navigator.ANIM_DURATION).setInterpolator(new AccelerateInterpolator()).start();
         MainActivity.of(getActivity()).animateHomeIcon(MaterialMenuDrawable.IconState.ARROW);
     }
@@ -245,8 +246,6 @@ public class PizzaDetailFragment extends TransitionUtil.BaseFragment implements 
         if (isInternetAvailable) {
             MainActivity.of(getActivity()).getFabButton().setEnabled(true);
             loadToppingsByPizza();
-            // TODO ANIMATE THIS PART, REPLACE ANIMATION
-            //  animateRevealShow(main_view);
         } else {
             showEmptyOrErrorView("No internet connection available");
             MainActivity.of(getActivity()).getFabButton().setEnabled(false);
