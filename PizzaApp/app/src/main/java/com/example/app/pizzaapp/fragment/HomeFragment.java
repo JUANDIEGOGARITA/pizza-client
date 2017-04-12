@@ -46,7 +46,7 @@ public class HomeFragment extends TransitionUtil.BaseFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_home, container, false);
         ButterKnife.bind(this, rootView);
-        ((MainActivity) getActivity()).getHomeButton().setVisibility(View.GONE);
+        ((MainActivity) getActivity()).getToolbarButton().setVisibility(View.GONE);
         MainActivity.of(getActivity()).getFabButton().setVisibility(View.GONE);
         return rootView;
     }

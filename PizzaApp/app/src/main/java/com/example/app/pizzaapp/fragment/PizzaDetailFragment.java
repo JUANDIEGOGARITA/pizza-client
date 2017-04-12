@@ -1,7 +1,6 @@
 package com.example.app.pizzaapp.fragment;
 
 
-import android.animation.Animator;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.view.ViewCompat;
@@ -12,7 +11,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
@@ -92,7 +90,7 @@ public class PizzaDetailFragment extends TransitionUtil.BaseFragment implements 
         ButterKnife.bind(this, rootView);
         MainActivity activity = MainActivity.of(getActivity());
         toppingList = new ArrayList<>();
-        activity.getHomeButton().setVisibility(View.VISIBLE);
+        activity.getToolbarButton().setVisibility(View.VISIBLE);
         String itemText = getActivity().getIntent().getStringExtra("item_text");
         String itemDescription = getActivity().getIntent().getStringExtra("item_description");
         list = getActivity().getIntent().getStringArrayListExtra("list");
@@ -227,14 +225,14 @@ public class PizzaDetailFragment extends TransitionUtil.BaseFragment implements 
     @Override
     public void onBeforeEnter(View contentView) {
        // detail_layout.setVisibility(View.INVISIBLE);
-        MainActivity.of(getActivity()).getFragmentBackround().animate().scaleX(.92f).scaleY(.92f).alpha(.6f).setDuration(Navigator.ANIM_DURATION).setInterpolator(new AccelerateInterpolator()).start();
+        MainActivity.of(getActivity()).getFragmentBackground().animate().scaleX(.92f).scaleY(.92f).alpha(.6f).setDuration(Navigator.ANIM_DURATION).setInterpolator(new AccelerateInterpolator()).start();
         MainActivity.of(getActivity()).animateHomeIcon(MaterialMenuDrawable.IconState.ARROW);
     }
 
     @Override
     public boolean onBeforeBack() {
         MainActivity.of(getActivity()).animateHomeIcon(MaterialMenuDrawable.IconState.ARROW);
-        MainActivity.of(getActivity()).getFragmentBackround().animate().scaleX(1).scaleY(1).alpha(1).translationY(0).setDuration(Navigator.ANIM_DURATION / 4).setInterpolator(new DecelerateInterpolator()).start();
+        MainActivity.of(getActivity()).getFragmentBackground().animate().scaleX(1).scaleY(1).alpha(1).translationY(0).setDuration(Navigator.ANIM_DURATION / 4).setInterpolator(new DecelerateInterpolator()).start();
         TransitionUtil.fadeThenFinish(detailBodyTextView, getActivity());
         TransitionUtil.fadeThenFinish(titleTextView, getActivity());
 

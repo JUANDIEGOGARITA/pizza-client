@@ -22,9 +22,9 @@ import com.example.app.pizzaapp.fragment.HomeFragment;
 import com.example.app.pizzaapp.fragment.PizzaDetailFragment;
 import com.example.app.pizzaapp.fragment.PizzaListFragment;
 import com.example.app.pizzaapp.fragment.ToppingListFragment;
-import com.example.app.pizzaapp.util.TransitionUtil;
 import com.example.app.pizzaapp.receiver.NetworkStateChangeReceiver;
 import com.example.app.pizzaapp.util.BitmapUtil;
+import com.example.app.pizzaapp.util.TransitionUtil;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -37,29 +37,28 @@ public class MainActivity extends TransitionUtil.BaseActivity implements Network
     protected static String BASE_FRAGMENT = "base_fragment";
 
     @Bind(R.id.toolbar)
-    Toolbar toolbar;
+    Toolbar mToolbar;
 
     @Bind(R.id.toolbar_search)
     SearchView mSearchView;
 
     @Bind(R.id.material_menu_button)
-    MaterialMenuView homeButton;
+    MaterialMenuView mToolbarButton;
 
     @Bind(R.id.toolbar_title)
-    AppCompatTextView toolbarTitle;
+    AppCompatTextView mToolbarTitle;
 
     @Bind(R.id.fab)
-    FloatingActionButton fab;
-
+    FloatingActionButton mFab;
 
     @Bind(R.id.base_fragment_background)
-    View fragmentBackround;
+    View mFragmentBackground;
 
 
     @Bind(R.id.base_fragment_container)
-    CoordinatorLayout full_screen;
+    CoordinatorLayout mFullScreen;
 
-    private NetworkStateChangeReceiver networkStateChangeReceiver;
+    private NetworkStateChangeReceiver mNetworkStateChangeReceiver;
     private Snackbar snackbar;
 
 
@@ -70,9 +69,9 @@ public class MainActivity extends TransitionUtil.BaseActivity implements Network
         ButterKnife.bind(this);
         ;
         initToolbar();
-        networkStateChangeReceiver = new NetworkStateChangeReceiver();
-        networkStateChangeReceiver.setInternetStateHasChange(this);
-        snackbar = Snackbar.make(full_screen, getString(R.string.lost_internet_connection),
+        mNetworkStateChangeReceiver = new NetworkStateChangeReceiver();
+        mNetworkStateChangeReceiver.setInternetStateHasChange(this);
+        snackbar = Snackbar.make(mFullScreen, getString(R.string.lost_internet_connection),
                 Snackbar.LENGTH_INDEFINITE).setAction("", null);
 
         initMainView(savedInstanceState);
@@ -80,7 +79,7 @@ public class MainActivity extends TransitionUtil.BaseActivity implements Network
 
     private void initMainView(Bundle savedInstanceState) {
         if (getIntent().hasExtra("bitmap_id")) {
-            fragmentBackround.setBackground(new BitmapDrawable(getResources(), BitmapUtil.fetchBitmapFromIntent(getIntent())));
+            mFragmentBackground.setBackground(new BitmapDrawable(getResources(), BitmapUtil.fetchBitmapFromIntent(getIntent())));
         }
         TransitionUtil.BaseFragment fragment = null;
         if (savedInstanceState == null) {
@@ -115,11 +114,11 @@ public class MainActivity extends TransitionUtil.BaseActivity implements Network
     }
 
     private void initToolbar() {
-        if (toolbar != null) {
-            setSupportActionBar(toolbar);
+        if (mToolbar != null) {
+            setSupportActionBar(mToolbar);
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             getSupportActionBar().setTitle("");
-            homeButton.setOnClickListener(new View.OnClickListener() {
+            mToolbarButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     onBackPressed();
@@ -128,8 +127,8 @@ public class MainActivity extends TransitionUtil.BaseActivity implements Network
         }
     }
 
-    public void setToolbarTitleText(String text){
-        toolbarTitle.setText(text);
+    public void setToolbarTitleText(String text) {
+        mToolbarTitle.setText(text);
     }
 
     protected int getLayoutResource() {
@@ -141,14 +140,14 @@ public class MainActivity extends TransitionUtil.BaseActivity implements Network
     public boolean animateHomeIcon(MaterialMenuDrawable.IconState iconState) {
         if (currentIconState == iconState) return false;
         currentIconState = iconState;
-        homeButton.animateState(currentIconState);
+        mToolbarButton.animateState(currentIconState);
         return true;
     }
 
     public void setHomeIcon(MaterialMenuDrawable.IconState iconState) {
         if (currentIconState == iconState) return;
         currentIconState = iconState;
-        homeButton.setState(currentIconState);
+        mToolbarButton.setState(currentIconState);
 
     }
 
@@ -172,40 +171,40 @@ public class MainActivity extends TransitionUtil.BaseActivity implements Network
             snackbar.show();
 
         }
-         TransitionUtil.BaseFragment fragment = (TransitionUtil.BaseFragment) getSupportFragmentManager().findFragmentByTag(BASE_FRAGMENT);
+        TransitionUtil.BaseFragment fragment = (TransitionUtil.BaseFragment) getSupportFragmentManager().findFragmentByTag(BASE_FRAGMENT);
         fragment.networkChangedState(isInternetAvailable);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(networkStateChangeReceiver);
+        unregisterReceiver(mNetworkStateChangeReceiver);
     }
 
 
-    public void goBack(){
+    public void goBack() {
         onBackPressed();
     }
-    //Getters
 
+    //Getters
     public FloatingActionButton getFabButton() {
-        return fab;
+        return mFab;
     }
 
     public NetworkStateChangeReceiver getNetworkStateChangeReceiver() {
-        return networkStateChangeReceiver;
+        return mNetworkStateChangeReceiver;
     }
 
     public AppCompatTextView getToolbarTitle() {
-        return toolbarTitle;
+        return mToolbarTitle;
     }
 
     public Toolbar getToolbar() {
-        return toolbar;
+        return mToolbar;
     }
 
-    public MaterialMenuView getHomeButton() {
-        return homeButton;
+    public MaterialMenuView getToolbarButton() {
+        return mToolbarButton;
     }
 
     public Snackbar getSnackbar() {
@@ -216,7 +215,7 @@ public class MainActivity extends TransitionUtil.BaseActivity implements Network
         return mSearchView;
     }
 
-    public View getFragmentBackround() {
-        return fragmentBackround;
+    public View getFragmentBackground() {
+        return mFragmentBackground;
     }
 }

@@ -165,7 +165,7 @@ public class AddToppingFragment extends TransitionUtil.BaseFragment {
     public void onBeforeEnter(View contentView) {
         overlayLayout.setVisibility(View.INVISIBLE);
         MainActivity.of(getActivity()).getFabButton().setImageResource(R.mipmap.ic_check);
-        MainActivity.of(getActivity()).getHomeButton().setVisibility(View.VISIBLE);
+        MainActivity.of(getActivity()).getToolbarButton().setVisibility(View.VISIBLE);
         MainActivity.of(getActivity()).setHomeIcon(MaterialMenuDrawable.IconState.BURGER);
         MainActivity.of(getActivity()).animateHomeIcon(MaterialMenuDrawable.IconState.ARROW);
     }
