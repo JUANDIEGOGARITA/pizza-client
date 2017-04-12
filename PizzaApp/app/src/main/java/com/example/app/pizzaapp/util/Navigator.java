@@ -1,15 +1,25 @@
 package com.example.app.pizzaapp.util;
 
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.util.Pair;
 import android.support.v4.view.ViewCompat;
 import android.view.View;
 
 import com.example.app.pizzaapp.R;
 import com.example.app.pizzaapp.activity.MainActivity;
+import com.example.app.pizzaapp.fragment.AddPizzaFragment;
+import com.example.app.pizzaapp.fragment.AddToppingFragment;
+import com.example.app.pizzaapp.fragment.HomeFragment;
+import com.example.app.pizzaapp.fragment.PizzaDetailFragment;
+import com.example.app.pizzaapp.fragment.PizzaListFragment;
+import com.example.app.pizzaapp.fragment.ToppingListFragment;
 import com.example.app.pizzaapp.model.Pizza;
 
 import java.util.ArrayList;
@@ -100,24 +110,6 @@ public class Navigator {
         fromActivity.overridePendingTransition(R.anim.slide_up, R.anim.scale_down);
     }
 
-   /* public static void launchPizzaList(MainActivity fromActivity, String title, View fromView, int layout, View pizzaOptionWrapper) {
-        ViewCompat.setTransitionName(fromView, "title_element");
-        ViewCompat.setTransitionName(pizzaOptionWrapper, "option_wrapper");
-        ActivityOptionsCompat options =
-                TransitionUtil.makeOptionsCompat(
-                        fromActivity,
-                        Pair.create(fromView, "title_element"),
-                        Pair.create(pizzaOptionWrapper, "option_wrapper")
-                );
-        Intent intent = new Intent(fromActivity, MainActivity.class);
-        intent.putExtra("item_text", title);
-        intent.putExtra("fragment_resource_id", layout);
-
-        BitmapUtil.storeBitmapInIntent(BitmapUtil.createBitmap(fromActivity.findViewById(R.id.base_fragment_container)), intent);
-        ActivityCompat.startActivity(fromActivity, intent, options.toBundle());
-        fromActivity.overridePendingTransition(R.anim.slide_up, R.anim.scale_down);
-    }*/
-
     public static void launchList(MainActivity fromActivity, String title, View fromView, int layout, View optionWrapper) {
         ViewCompat.setTransitionName(fromView, "title_element");
         ViewCompat.setTransitionName(optionWrapper, "option_wrapper");
@@ -155,5 +147,30 @@ public class Navigator {
 
         ActivityCompat.startActivity(fromActivity, intent, options.toBundle());
         fromActivity.overridePendingTransition(R.anim.slide_up, R.anim.scale_down);
+    }
+
+    public static TransitionUtil.BaseFragment getBaseFragment(Activity activity) {
+        int fragmentResourceId = activity.getIntent().getIntExtra("fragment_resource_id", 0);
+        switch (fragmentResourceId) {
+            case R.layout.fragment_pizza_list:
+                return new PizzaListFragment();
+            case R.layout.fragment_pizza_detail:
+                return PizzaDetailFragment.create();
+            case R.layout.fragment_add_pizza:
+                return new AddPizzaFragment();
+            case R.layout.fragment_topping_list:
+                return new ToppingListFragment();
+            case R.layout.fragment_add_topping:
+                return new AddToppingFragment();
+            default:
+                return new HomeFragment();
+        }
+    }
+
+    public static void setBaseFragment(FragmentActivity activity, TransitionUtil.BaseFragment fragment) {
+        if (fragment == null) return;
+        FragmentTransaction transaction = activity.getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.base_fragment, fragment, AppContants.BASE_FRAGMENT);
+        transaction.commit();
     }
 }

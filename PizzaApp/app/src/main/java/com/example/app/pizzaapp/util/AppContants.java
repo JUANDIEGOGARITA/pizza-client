@@ -7,4 +7,5 @@ package com.example.app.pizzaapp.util;
 public class AppContants {
 
     public static int OK_HTTP_RESPONSE = 200;
+    public static String BASE_FRAGMENT = "base_fragment";
 }

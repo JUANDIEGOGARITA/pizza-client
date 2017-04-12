@@ -7,7 +7,6 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -16,14 +15,11 @@ import android.widget.SearchView;
 import com.balysv.materialmenu.MaterialMenuDrawable;
 import com.balysv.materialmenu.MaterialMenuView;
 import com.example.app.pizzaapp.R;
-import com.example.app.pizzaapp.fragment.AddPizzaFragment;
-import com.example.app.pizzaapp.fragment.AddToppingFragment;
-import com.example.app.pizzaapp.fragment.HomeFragment;
-import com.example.app.pizzaapp.fragment.PizzaDetailFragment;
-import com.example.app.pizzaapp.fragment.PizzaListFragment;
-import com.example.app.pizzaapp.fragment.ToppingListFragment;
 import com.example.app.pizzaapp.receiver.NetworkStateChangeReceiver;
+import com.example.app.pizzaapp.util.AppContants;
 import com.example.app.pizzaapp.util.BitmapUtil;
+import com.example.app.pizzaapp.util.Initializer;
+import com.example.app.pizzaapp.util.Navigator;
 import com.example.app.pizzaapp.util.TransitionUtil;
 
 import butterknife.Bind;
@@ -32,9 +28,7 @@ import butterknife.ButterKnife;
 /**
  * Created by juandiegoGL on 4/6/17.
  */
-public class MainActivity extends TransitionUtil.BaseActivity implements NetworkStateChangeReceiver.InternetStateHasChange {
-
-    protected static String BASE_FRAGMENT = "base_fragment";
+public class MainActivity extends TransitionUtil.BaseActivity implements Initializer, NetworkStateChangeReceiver.InternetStateHasChange {
 
     @Bind(R.id.toolbar)
     Toolbar mToolbar;
@@ -59,21 +53,14 @@ public class MainActivity extends TransitionUtil.BaseActivity implements Network
     CoordinatorLayout mFullScreen;
 
     private NetworkStateChangeReceiver mNetworkStateChangeReceiver;
-    private Snackbar snackbar;
-
+    private Snackbar mSnackBar;
+    private MaterialMenuDrawable.IconState mCurrentIconState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(getLayoutResource());
-        ButterKnife.bind(this);
-        ;
-        initToolbar();
-        mNetworkStateChangeReceiver = new NetworkStateChangeReceiver();
-        mNetworkStateChangeReceiver.setInternetStateHasChange(this);
-        snackbar = Snackbar.make(mFullScreen, getString(R.string.lost_internet_connection),
-                Snackbar.LENGTH_INDEFINITE).setAction("", null);
-
+        setContentView(R.layout.activity_main);
+        init();
         initMainView(savedInstanceState);
     }
 
@@ -83,34 +70,9 @@ public class MainActivity extends TransitionUtil.BaseActivity implements Network
         }
         TransitionUtil.BaseFragment fragment = null;
         if (savedInstanceState == null) {
-            fragment = getBaseFragment();
+            fragment = Navigator.getBaseFragment(this);
         }
-        setBaseFragment(fragment);
-    }
-
-    protected TransitionUtil.BaseFragment getBaseFragment() {
-        int fragmentResourceId = getIntent().getIntExtra("fragment_resource_id", 0);
-        switch (fragmentResourceId) {
-            case R.layout.fragment_pizza_list:
-                return new PizzaListFragment();
-            case R.layout.fragment_pizza_detail:
-                return PizzaDetailFragment.create();
-            case R.layout.fragment_add_pizza:
-                return new AddPizzaFragment();
-            case R.layout.fragment_topping_list:
-                return new ToppingListFragment();
-            case R.layout.fragment_add_topping:
-                return new AddToppingFragment();
-            default:
-                return new HomeFragment();
-        }
-    }
-
-    public void setBaseFragment(TransitionUtil.BaseFragment fragment) {
-        if (fragment == null) return;
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.base_fragment, fragment, BASE_FRAGMENT);
-        transaction.commit();
+        Navigator.setBaseFragment(this, fragment);
     }
 
     private void initToolbar() {
@@ -127,28 +89,17 @@ public class MainActivity extends TransitionUtil.BaseActivity implements Network
         }
     }
 
-    public void setToolbarTitleText(String text) {
-        mToolbarTitle.setText(text);
-    }
-
-    protected int getLayoutResource() {
-        return R.layout.activity_main;
-    }
-
-    private MaterialMenuDrawable.IconState currentIconState;
-
     public boolean animateHomeIcon(MaterialMenuDrawable.IconState iconState) {
-        if (currentIconState == iconState) return false;
-        currentIconState = iconState;
-        mToolbarButton.animateState(currentIconState);
+        if (mCurrentIconState == iconState) return false;
+        mCurrentIconState = iconState;
+        mToolbarButton.animateState(mCurrentIconState);
         return true;
     }
 
     public void setHomeIcon(MaterialMenuDrawable.IconState iconState) {
-        if (currentIconState == iconState) return;
-        currentIconState = iconState;
-        mToolbarButton.setState(currentIconState);
-
+        if (mCurrentIconState == iconState) return;
+        mCurrentIconState = iconState;
+        mToolbarButton.setState(mCurrentIconState);
     }
 
     @Override
@@ -157,21 +108,17 @@ public class MainActivity extends TransitionUtil.BaseActivity implements Network
         return false;
     }
 
-    public static MainActivity of(Activity activity) {
-        return (MainActivity) activity;
-    }
-
     @Override
     public void networkChangedState(boolean isInternetAvailable) {
         if (isInternetAvailable) {
-            if (snackbar.isShown()) {
-                snackbar.dismiss();
+            if (mSnackBar.isShown()) {
+                mSnackBar.dismiss();
             }
         } else {
-            snackbar.show();
+            mSnackBar.show();
 
         }
-        TransitionUtil.BaseFragment fragment = (TransitionUtil.BaseFragment) getSupportFragmentManager().findFragmentByTag(BASE_FRAGMENT);
+        TransitionUtil.BaseFragment fragment = (TransitionUtil.BaseFragment) getSupportFragmentManager().findFragmentByTag(AppContants.BASE_FRAGMENT);
         fragment.networkChangedState(isInternetAvailable);
     }
 
@@ -181,9 +128,12 @@ public class MainActivity extends TransitionUtil.BaseActivity implements Network
         unregisterReceiver(mNetworkStateChangeReceiver);
     }
 
-
     public void goBack() {
         onBackPressed();
+    }
+
+    public static MainActivity of(Activity activity) {
+        return (MainActivity) activity;
     }
 
     //Getters
@@ -199,16 +149,12 @@ public class MainActivity extends TransitionUtil.BaseActivity implements Network
         return mToolbarTitle;
     }
 
-    public Toolbar getToolbar() {
-        return mToolbar;
-    }
-
     public MaterialMenuView getToolbarButton() {
         return mToolbarButton;
     }
 
-    public Snackbar getSnackbar() {
-        return snackbar;
+    public Snackbar getSnackBar() {
+        return mSnackBar;
     }
 
     public SearchView getSearchView() {
@@ -217,5 +163,30 @@ public class MainActivity extends TransitionUtil.BaseActivity implements Network
 
     public View getFragmentBackground() {
         return mFragmentBackground;
+    }
+
+    //Setters
+    public void setToolbarTitleText(String text) {
+        mToolbarTitle.setText(text);
+    }
+
+    @Override
+    public void init() {
+        ButterKnife.bind(this);
+        initFrontendComponents();
+        initBackendComponents();
+    }
+
+    @Override
+    public void initFrontendComponents() {
+        initToolbar();
+        mSnackBar = Snackbar.make(mFullScreen, getString(R.string.lost_internet_connection),
+                Snackbar.LENGTH_INDEFINITE).setAction("", null);
+    }
+
+    @Override
+    public void initBackendComponents() {
+        mNetworkStateChangeReceiver = new NetworkStateChangeReceiver();
+        mNetworkStateChangeReceiver.setInternetStateHasChange(this);
     }
 }

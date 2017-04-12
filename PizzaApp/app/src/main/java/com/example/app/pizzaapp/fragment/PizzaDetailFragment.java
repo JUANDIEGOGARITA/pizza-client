@@ -247,8 +247,8 @@ public class PizzaDetailFragment extends TransitionUtil.BaseFragment implements 
         } else {
             showEmptyOrErrorView("No internet connection available");
             MainActivity.of(getActivity()).getFabButton().setEnabled(false);
-            if (!MainActivity.of(getActivity()).getSnackbar().isShown()) {
-                MainActivity.of(getActivity()).getSnackbar().show();
+            if (!MainActivity.of(getActivity()).getSnackBar().isShown()) {
+                MainActivity.of(getActivity()).getSnackBar().show();
             }
         }
     }
