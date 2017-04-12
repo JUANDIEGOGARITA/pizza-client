@@ -21,9 +21,9 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:background="@color/add_topping_title_background"
+            android:layout_height="70dp"
             android:layout_alignBottom="@+id/pizza_pic"
-            android:layout_height="70dp">
+            android:background="@color/add_topping_title_background">
 
             <android.support.v7.widget.AppCompatTextView
                 android:id="@+id/title"
@@ -31,32 +31,47 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:text="Please add your Topping"
-                android:textStyle="bold"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large"
-                android:textColor="@android:color/white" />
+                android:textColor="@android:color/white"
+                android:textStyle="bold" />
+
         </RelativeLayout>
     </RelativeLayout>
 
-
-    <android.support.design.widget.TextInputLayout
-        android:id="@+id/time_wrapper"
-        android:layout_margin="10dp"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColorHint="@android:color/white"
+        android:layout_height="match_parent"
+        android:layout_margin="10dp"
         android:background="@drawable/item_background"
-        app:hintTextAppearance="@style/TextAppearence.App.TextInputLayout">
+        android:padding="10dp">
 
-
-        <EditText
-            android:id="@+id/topping"
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/topping_description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Topping"
-            android:imeOptions="actionDone"
-            android:inputType="none"
-            android:textColor="@android:color/white" />
-    </android.support.design.widget.TextInputLayout>
+            android:layout_marginBottom="10dp"
+            android:text="@string/add_topping_description"
+            android:textColor="@color/colorAccent" />
 
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/time_wrapper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/topping_description"
+            android:textColorHint="@android:color/white"
+            app:hintTextAppearance="@style/TextInputLayout">
+
+            <EditText
+                android:id="@+id/topping"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/colorAccent"
+                android:hint="Topping"
+                android:imeOptions="actionDone"
+                android:inputType="none"
+                android:textColor="@android:color/white" />
+        </android.support.design.widget.TextInputLayout>
+
+    </RelativeLayout>
 
 </LinearLayout>

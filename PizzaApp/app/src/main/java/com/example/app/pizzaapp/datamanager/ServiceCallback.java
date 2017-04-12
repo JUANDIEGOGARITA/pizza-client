@@ -3,17 +3,19 @@ package com.example.app.pizzaapp.datamanager;
 /**
  * Created by juandiegoGL on 4/6/17.
  */
-public interface ServiceCallback<T, E> {
+public interface ServiceCallback<S, T, E> {
 
     /**
      * This function will be called when the service returns a success.
+     *
      * @param response the response object returned by the associated parser.
      */
-    void onSuccess(T response);
+    void onSuccess(S status, T response);
 
 
     /**
      * This function will be called when the service returs an error (400+, 500+ 300+)
+     *
      * @param networkError the NetworkError object.
      */
     void onError(E networkError);

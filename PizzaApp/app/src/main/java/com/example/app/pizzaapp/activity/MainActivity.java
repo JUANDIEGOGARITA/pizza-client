@@ -11,6 +11,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.SearchView;
 
 import com.balysv.materialmenu.MaterialMenuDrawable;
 import com.balysv.materialmenu.MaterialMenuView;
@@ -21,7 +22,7 @@ import com.example.app.pizzaapp.fragment.HomeFragment;
 import com.example.app.pizzaapp.fragment.PizzaDetailFragment;
 import com.example.app.pizzaapp.fragment.PizzaListFragment;
 import com.example.app.pizzaapp.fragment.ToppingListFragment;
-import com.example.app.pizzaapp.helper.TransitionHelper;
+import com.example.app.pizzaapp.util.TransitionUtil;
 import com.example.app.pizzaapp.receiver.NetworkStateChangeReceiver;
 import com.example.app.pizzaapp.util.BitmapUtil;
 
@@ -31,25 +32,26 @@ import butterknife.ButterKnife;
 /**
  * Created by juandiegoGL on 4/6/17.
  */
-public class MainActivity extends TransitionHelper.BaseActivity implements NetworkStateChangeReceiver.InternetStateHasChange {
+public class MainActivity extends TransitionUtil.BaseActivity implements NetworkStateChangeReceiver.InternetStateHasChange {
 
     protected static String BASE_FRAGMENT = "base_fragment";
 
-    public
     @Bind(R.id.toolbar)
     Toolbar toolbar;
 
-    public
+    @Bind(R.id.toolbar_search)
+    SearchView mSearchView;
+
     @Bind(R.id.material_menu_button)
     MaterialMenuView homeButton;
-    public
+
     @Bind(R.id.toolbar_title)
     AppCompatTextView toolbarTitle;
-    public
+
     @Bind(R.id.fab)
     FloatingActionButton fab;
 
-    public
+
     @Bind(R.id.base_fragment_background)
     View fragmentBackround;
 
@@ -80,21 +82,21 @@ public class MainActivity extends TransitionHelper.BaseActivity implements Netwo
         if (getIntent().hasExtra("bitmap_id")) {
             fragmentBackround.setBackground(new BitmapDrawable(getResources(), BitmapUtil.fetchBitmapFromIntent(getIntent())));
         }
-        TransitionHelper.BaseFragment fragment = null;
+        TransitionUtil.BaseFragment fragment = null;
         if (savedInstanceState == null) {
             fragment = getBaseFragment();
         }
         setBaseFragment(fragment);
     }
 
-    protected TransitionHelper.BaseFragment getBaseFragment() {
+    protected TransitionUtil.BaseFragment getBaseFragment() {
         int fragmentResourceId = getIntent().getIntExtra("fragment_resource_id", 0);
         switch (fragmentResourceId) {
             case R.layout.fragment_pizza_list:
                 return new PizzaListFragment();
             case R.layout.fragment_pizza_detail:
                 return PizzaDetailFragment.create();
-            case R.layout.fragment_overaly:
+            case R.layout.fragment_add_pizza:
                 return new AddPizzaFragment();
             case R.layout.fragment_topping_list:
                 return new ToppingListFragment();
@@ -105,7 +107,7 @@ public class MainActivity extends TransitionHelper.BaseActivity implements Netwo
         }
     }
 
-    public void setBaseFragment(TransitionHelper.BaseFragment fragment) {
+    public void setBaseFragment(TransitionUtil.BaseFragment fragment) {
         if (fragment == null) return;
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.base_fragment, fragment, BASE_FRAGMENT);
@@ -170,7 +172,7 @@ public class MainActivity extends TransitionHelper.BaseActivity implements Netwo
             snackbar.show();
 
         }
-         TransitionHelper.BaseFragment fragment = (TransitionHelper.BaseFragment) getSupportFragmentManager().findFragmentByTag(BASE_FRAGMENT);
+         TransitionUtil.BaseFragment fragment = (TransitionUtil.BaseFragment) getSupportFragmentManager().findFragmentByTag(BASE_FRAGMENT);
         fragment.networkChangedState(isInternetAvailable);
     }
 
@@ -194,7 +196,27 @@ public class MainActivity extends TransitionHelper.BaseActivity implements Netwo
         return networkStateChangeReceiver;
     }
 
+    public AppCompatTextView getToolbarTitle() {
+        return toolbarTitle;
+    }
+
+    public Toolbar getToolbar() {
+        return toolbar;
+    }
+
+    public MaterialMenuView getHomeButton() {
+        return homeButton;
+    }
+
     public Snackbar getSnackbar() {
         return snackbar;
+    }
+
+    public SearchView getSearchView() {
+        return mSearchView;
+    }
+
+    public View getFragmentBackround() {
+        return fragmentBackround;
     }
 }

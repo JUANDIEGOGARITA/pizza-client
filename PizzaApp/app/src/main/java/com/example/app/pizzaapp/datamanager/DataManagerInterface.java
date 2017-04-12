@@ -2,6 +2,7 @@ package com.example.app.pizzaapp.datamanager;
 
 import com.example.app.pizzaapp.model.GetToppingByPizzaResult;
 import com.example.app.pizzaapp.model.Pizza;
+import com.example.app.pizzaapp.model.PostPizza;
 import com.example.app.pizzaapp.model.PostTopping;
 import com.example.app.pizzaapp.model.PostToppingByPizza;
 import com.example.app.pizzaapp.model.PostToppingByPizzaResult;
@@ -36,8 +37,8 @@ public interface DataManagerInterface {
     @POST("toppings")
     Call<Topping> postTopping(@Body PostTopping toppingName);
 
-    @POST("pizza")
-    Call<Pizza> postPizza(@Body Pizza topping);
+    @POST("pizzas")
+    Call<Pizza> postPizza(@Body PostPizza topping);
 
     @POST("pizzas/{id}/toppings")
     Call<PostToppingByPizzaResult> postToppingByPizza(@Path("id") int id, @Body PostToppingByPizza topping);

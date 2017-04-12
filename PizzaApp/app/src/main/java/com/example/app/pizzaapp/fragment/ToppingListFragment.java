@@ -2,12 +2,9 @@
 package com.example.app.pizzaapp.fragment;
 
 import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ArgbEvaluator;
-import android.animation.ValueAnimator;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -16,9 +13,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.RelativeLayout;
+import android.widget.SearchView;
+import android.widget.TextView;
 
 import com.balysv.materialmenu.MaterialMenuDrawable;
 import com.example.app.pizzaapp.R;
@@ -27,10 +25,13 @@ import com.example.app.pizzaapp.adapter.BaseRecyclerAdapter;
 import com.example.app.pizzaapp.adapter.ToppingRecyclerAdapter;
 import com.example.app.pizzaapp.datamanager.DataManager;
 import com.example.app.pizzaapp.datamanager.ServiceCallback;
-import com.example.app.pizzaapp.helper.TransitionHelper;
 import com.example.app.pizzaapp.model.PostToppingByPizza;
 import com.example.app.pizzaapp.model.Topping;
+import com.example.app.pizzaapp.util.AppContants;
+import com.example.app.pizzaapp.util.DialogUtil;
+import com.example.app.pizzaapp.util.DialogUtilListener;
 import com.example.app.pizzaapp.util.Navigator;
+import com.example.app.pizzaapp.util.TransitionUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,20 +43,67 @@ import butterknife.ButterKnife;
  * Created by juandiegoGL on 4/6/17.
  */
 
-public class ToppingListFragment extends TransitionHelper.BaseFragment implements CheckListener {
+public class ToppingListFragment extends TransitionUtil.BaseFragment implements SearchView.OnQueryTextListener {
+
     @Bind(R.id.recycler)
     RecyclerView recyclerView;
+
     @Bind(R.id.refresh_layout)
     SwipeRefreshLayout mRefreshLayout;
+
     @Bind(R.id.main_view)
     RelativeLayout main_view;
-    ToppingRecyclerAdapter recyclerAdapter;
-    int a, b, c;
 
-    List<Integer> toppingIdList;
+    @Bind(R.id.empty_view)
+    RelativeLayout empty_view;
+
+    @Bind(R.id.error_message)
+    TextView error_message;
+    ToppingRecyclerAdapter recyclerAdapter;
+
+    int a, b, c;
+    List<Integer> toppingIdList, toppingIdListByPizza;
+    ArrayList<Topping> mToppingList;
 
     boolean isCheckAvailable = false;
     int mPizzaId;
+
+    boolean isLastOne = false;
+
+    String itemDescription;
+
+    CheckListener mCheckListener = new CheckListener() {
+        @Override
+        public void onToppingChecked(int toppingId) {
+            if (!toppingIdList.contains(toppingId)) {
+                toppingIdList.add(toppingId);
+            }
+            validateFabButtonState();
+        }
+
+        @Override
+        public void onToppingUnChecked(int toppingId) {
+            if (toppingIdList.contains(toppingId)) {
+                for (int i = 0; i < toppingIdList.size(); i++) {
+                    if (toppingIdList.get(i) == toppingId) ;
+                    toppingIdList.remove(i);
+                }
+            }
+            validateFabButtonState();
+        }
+    };
+
+    DialogUtilListener mDialogListener = new DialogUtilListener() {
+        @Override
+        public void onPositiveButtonClicked() {
+            postToppingsByPizza();
+        }
+
+        @Override
+        public void onNegativeButtonClicked(DialogInterface d) {
+            d.dismiss();
+        }
+    };
 
     public ToppingListFragment() {
     }
@@ -69,14 +117,15 @@ public class ToppingListFragment extends TransitionHelper.BaseFragment implement
         b = getActivity().getIntent().getIntExtra("b", 0);
         c = getActivity().getIntent().getIntExtra("c", 0);
         //TODO GET FLAG EXTRA
-        MainActivity activity = MainActivity.of(getActivity());
-        String itemDescription = getActivity().getIntent().getStringExtra("item_text");
+        itemDescription = getActivity().getIntent().getStringExtra("item_text");
         mPizzaId = getActivity().getIntent().getIntExtra("pizzaId", -1);
+        toppingIdListByPizza = getActivity().getIntent().getIntegerArrayListExtra("toppingIds");
+
         if (mPizzaId != -1) {
             isCheckAvailable = true;
         }
 
-        ((MainActivity) getActivity()).toolbarTitle.setText(itemDescription);
+        ((MainActivity) getActivity()).getToolbarTitle().setText(itemDescription);
         mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -85,6 +134,7 @@ public class ToppingListFragment extends TransitionHelper.BaseFragment implement
         });
 
         initRecyclerView();
+        initSearchView();
         initBodyText();
         return rootView;
     }
@@ -111,13 +161,13 @@ public class ToppingListFragment extends TransitionHelper.BaseFragment implement
                         .translationY(0)
                         .start();
             }
-        }, 350);
+        }, 400);
     }
 
     private void initRecyclerView() {
-        if(isCheckAvailable){
-            recyclerAdapter = new ToppingRecyclerAdapter(this, isCheckAvailable);
-        }else{
+        if (isCheckAvailable) {
+            recyclerAdapter = new ToppingRecyclerAdapter(mCheckListener, isCheckAvailable);
+        } else {
             recyclerAdapter = new ToppingRecyclerAdapter();
         }
 
@@ -139,29 +189,87 @@ public class ToppingListFragment extends TransitionHelper.BaseFragment implement
         MainActivity.of(getActivity()).getFabButton().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (isCheckAvailable) {
-                    postToppingsByPizza(mPizzaId);
+                MainActivity.of(getActivity()).getSearchView().onActionViewCollapsed();
+                ((MainActivity) getActivity()).getToolbarTitle().setVisibility(View.VISIBLE);
+                if (!toppingIdList.isEmpty()) {
+                    postToppingsByPizza();
                 } else {
-                    Navigator.launchAddToppingFragment(MainActivity.of(getActivity()), v, getActivity().findViewById(R.id.base_fragment_container));
+                    Navigator.launchAddToppingFragment(MainActivity.of(getActivity()), v, getActivity().findViewById(R.id.base_fragment_container), getToppingNameList());
                 }
             }
         });
     }
 
+    private ArrayList<String> getToppingNameList() {
+        ArrayList<String> toppingNameList = new ArrayList<>();
+        if (!mToppingList.isEmpty()) {
+            for (Topping topping : mToppingList) {
+                toppingNameList.add(topping.getName());
+            }
+        }
+        return toppingNameList;
+    }
+
     private void loadToppings() {
-        recyclerAdapter.updateList(new ArrayList<Topping>());
+        if (isInternetAvailable()) {
+            mRefreshLayout.setRefreshing(true);
+            new DataManager(getActivity()).getToppings(new ServiceCallback() {
+                @Override
+                public void onSuccess(Object status, Object response) {
+                    if (mRefreshLayout.isRefreshing()) {
+                        mRefreshLayout.setRefreshing(false);
+                    }
+                    empty_view.setVisibility(View.GONE);
+                    recyclerView.setVisibility(View.VISIBLE);
+
+                    if (Integer.parseInt(status.toString()) == AppContants.OK_HTTP_RESPONSE) {
+                        mToppingList = (ArrayList<Topping>) response;
+                        ArrayList<Topping> responseList = mToppingList;
+
+
+                        ArrayList<Topping> listToDisplay = getFilteredByPizzaId(mPizzaId, responseList);
+                        if (listToDisplay.isEmpty()) {
+                            showEmptyOrErrorView("No more toppings to add");
+                        } else {
+                            recyclerAdapter.updateList(listToDisplay);
+                        }
+
+                    } else {
+                        showEmptyOrErrorView(status.toString() + " Internal Server Error");
+                    }
+                }
+
+                @Override
+                public void onError(Object networkError) {
+                    showEmptyOrErrorView(networkError.toString());
+                }
+
+                @Override
+                public void onPreExecute() {
+
+                }
+            });
+        } else {
+            networkChangedState(false);
+        }
+
+
         new DataManager(getActivity()).getToppings(new ServiceCallback() {
             @Override
-            public void onSuccess(Object response) {
+            public void onSuccess(Object status, Object response) {
                 if (mRefreshLayout.isRefreshing()) {
                     mRefreshLayout.setRefreshing(false);
                 }
-                ArrayList<Topping> toppingArrayList = (ArrayList<Topping>) response;
 
-             /*   for (int i = 0; i < toppingArrayList.size(); i++) {
-                    addyExtras.add(toppingArrayList.get(i).getName());
-                }*/
-                recyclerAdapter.updateList(toppingArrayList);
+                ArrayList<Topping> responseList = (ArrayList<Topping>) response;
+
+
+                ArrayList<Topping> listToDisplay = getFilteredByPizzaId(mPizzaId, responseList);
+                if (listToDisplay.isEmpty()) {
+                    //TODO IF TOPPINGLIST IS EMPTY DISPLAY MESSAGE
+                } else {
+                    recyclerAdapter.updateList(listToDisplay);
+                }
             }
 
             @Override
@@ -176,19 +284,45 @@ public class ToppingListFragment extends TransitionHelper.BaseFragment implement
         });
     }
 
-    private void postToppingsByPizza(int pizzaId) {
+    private ArrayList<Topping> getFilteredByPizzaId(int pizzaId, ArrayList<Topping> responseList) {
+        if (pizzaId == -1) {
+            return responseList;
+        } else {
+            ArrayList<Topping> responseListFiltered = new ArrayList<>();
+            for (int i = 0; i < responseList.size(); i++) {
+                Topping currentTopping = responseList.get(i);
+                if (!toppingIdListByPizza.contains(Integer.parseInt(currentTopping.getId()))) {
+                    responseListFiltered.add(currentTopping);
+                }
+            }
+            return responseListFiltered;
+        }
+    }
+
+    private void postToppingsByPizza() {
+
         DataManager dataManager = new DataManager(getActivity());
 
         for (int i = 0; i < toppingIdList.size(); i++) {
-            dataManager.postToppingByPizza(pizzaId, new PostToppingByPizza(toppingIdList.get(i)), new ServiceCallback() {
+            if (i == toppingIdList.size() - 1) {
+                isLastOne = true;
+            }
+            dataManager.postToppingByPizza(mPizzaId, new PostToppingByPizza(toppingIdList.get(i)), new ServiceCallback() {
                 @Override
-                public void onSuccess(Object response) {
-                    MainActivity.of(getActivity()).goBack();
+                public void onSuccess(Object status, Object response) {
+                    if (Integer.parseInt(status.toString()) == AppContants.OK_HTTP_RESPONSE) {
+                        //TODO ADD ERROR VALIDATION
+                        if (isLastOne) {
+                            MainActivity.of(getActivity()).goBack();
+                        }
+                    } else {
+                        showErrorDialog(status.toString() + " Internal Server Error");
+                    }
                 }
 
                 @Override
                 public void onError(Object networkError) {
-
+                    showErrorDialog(networkError.toString());
                 }
 
                 @Override
@@ -196,31 +330,35 @@ public class ToppingListFragment extends TransitionHelper.BaseFragment implement
 
                 }
             });
-
         }
     }
 
+
     @Override
     public void onBeforeViewShows(View contentView) {
-        ViewCompat.setTransitionName(((MainActivity) getActivity()).toolbarTitle, "title_element");
-        TransitionHelper.excludeEnterTarget(getActivity(), R.id.toolbar_container, true);
-        TransitionHelper.excludeEnterTarget(getActivity(), R.id.full_screen, true);
+        ViewCompat.setTransitionName(((MainActivity) getActivity()).getToolbarTitle(), "title_element");
+        ViewCompat.setTransitionName(main_view, "option_wrapper");
 
+        TransitionUtil.excludeEnterTarget(getActivity(), R.id.toolbar_container, true);
+        TransitionUtil.excludeEnterTarget(getActivity(), R.id.full_screen, true);
     }
 
     @Override
-    public void onAfterEnter() {
-        MainActivity.of(getActivity()).getFabButton().setVisibility(View.VISIBLE);
-        animateRevealShow(main_view);
+    public boolean onBeforeBack() {
+        MainActivity.of(getActivity()).animateHomeIcon(MaterialMenuDrawable.IconState.ARROW);
+        TransitionUtil.fadeThenFinish(recyclerView, getActivity());
+        TransitionUtil.fadeThenFinish(MainActivity.of(getActivity()).getFabButton(), getActivity());
+
+        return false;
     }
 
-    public void animateRevealShow(View viewRoot) {
+    @Override
+    public void onBeforeEnter(View contentView) {
+        MainActivity.of(getActivity()).animateHomeIcon(MaterialMenuDrawable.IconState.ARROW);
+    }
 
-        Animator anim = ViewAnimationUtils.createCircularReveal(viewRoot, a, b, 0, c);
-        viewRoot.setVisibility(View.VISIBLE);
-        anim.setInterpolator(new DecelerateInterpolator());
-        anim.setDuration(Navigator.ANIM_DURATION);
-        anim.start();
+    private void showErrorDialog(String errorMessage) {
+        DialogUtil.showErrorDialog(mDialogListener, getActivity(), errorMessage);
     }
 
     @Override
@@ -229,94 +367,81 @@ public class ToppingListFragment extends TransitionHelper.BaseFragment implement
         loadToppings();
     }
 
-    @Override
-    public boolean onBeforeBack() {
-        animateRevealHide(main_view);
-        animateRevealHide(MainActivity.of(getActivity()).getFabButton());
-        return false;
+    public void showEmptyOrErrorView(String message) {
+        recyclerView.setVisibility(View.GONE);
+        empty_view.setVisibility(View.VISIBLE);
+        error_message.setText(message);
+
     }
 
-    public void animateRevealHide(final View viewRoot) {
-        Animator anim = ViewAnimationUtils.createCircularReveal(viewRoot, a, b, c, 0);
-        anim.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-                viewRoot.setVisibility(View.INVISIBLE);
-            }
-        });
-        anim.setInterpolator(new AccelerateInterpolator());
-        anim.setDuration(Navigator.ANIM_DURATION);
-        anim.start();
+    private void validateFabButtonState() {
+        if (toppingIdList.isEmpty()) {
+            mRefreshLayout.setEnabled(true);
+            MainActivity.of(getActivity()).getFabButton().setImageResource(R.mipmap.ic_add);
 
-        Integer colorTo = getResources().getColor(android.R.color.white);
-        Integer colorFrom = getResources().getColor(android.R.color.white);
-        ValueAnimator colorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
-        colorAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animator) {
-                main_view.setBackgroundColor((Integer) animator.getAnimatedValue());
-            }
-
-        });
-        colorAnimation.setInterpolator(new AccelerateInterpolator(2));
-        colorAnimation.setDuration(Navigator.ANIM_DURATION);
-        colorAnimation.start();
-    }
-
-
-    @Override
-    public void onBeforeEnter(View contentView) {
-        main_view.setVisibility(View.INVISIBLE);
-        MainActivity.of(getActivity()).getFabButton().setVisibility(View.INVISIBLE);
-        MainActivity.of(getActivity()).fragmentBackround.animate().scaleX(.92f).scaleY(.92f).alpha(.6f).setDuration(Navigator.ANIM_DURATION).setInterpolator(new AccelerateInterpolator()).start();
-        MainActivity.of(getActivity()).animateHomeIcon(MaterialMenuDrawable.IconState.ARROW);
-
+        } else {
+            mRefreshLayout.setEnabled(false);
+            MainActivity.of(getActivity()).getFabButton().setImageResource(R.mipmap.ic_check);
+        }
     }
 
     @Override
     public void networkChangedState(boolean isInternetAvailable) {
         if (isInternetAvailable) {
+            MainActivity.of(getActivity()).getFabButton().setEnabled(true);
             loadToppings();
         } else {
-            //TODO DISPLAY NO VIEW
-        }
-    }
-
-    private void setFabButtonStyle() {
-        if (toppingIdList.isEmpty()) {
-
-        }
-    }
-
-    @Override
-    public void onToppingChecked(int toppingId) {
-        if (!toppingIdList.contains(toppingId)) {
-            toppingIdList.add(toppingId);
-        }
-        validateFabButtonState();
-    }
-
-    @Override
-    public void onToppingUnChecked(int toppingId) {
-        if (toppingIdList.contains(toppingId)) {
-            for(int i = 0; i<toppingIdList.size(); i++){
-                if(toppingIdList.get(i) == toppingId);
-                toppingIdList.remove(i);
+            showEmptyOrErrorView("No internet connection available");
+            MainActivity.of(getActivity()).getFabButton().setEnabled(false);
+            if (!MainActivity.of(getActivity()).getSnackbar().isShown()) {
+                MainActivity.of(getActivity()).getSnackbar().show();
             }
         }
-        validateFabButtonState();
     }
 
-    private void validateFabButtonState() {
-        FloatingActionButton fab = MainActivity.of(getActivity()).getFabButton();
-        if (toppingIdList.isEmpty()) {
-            fab.setEnabled(false);
-            mRefreshLayout.setEnabled(true);
-        } else {
-            fab.setEnabled(true);
-            mRefreshLayout.setEnabled(false);
+    private void initSearchView() {
+        final SearchView searchView = MainActivity.of(getActivity()).getSearchView();
+        searchView.setVisibility(View.VISIBLE);
+        searchView.setOnQueryTextListener(this);
 
+        searchView.setOnSearchClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                MainActivity.of(getActivity()).getToolbarTitle().setVisibility(View.GONE);
+            }
+        });
+        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                MainActivity.of(getActivity()).getToolbarTitle().setVisibility(View.VISIBLE);
+                recyclerAdapter.updateList(mToppingList);
+                return false;
+            }
+        });
+    }
+
+    @Override
+    public boolean onQueryTextChange(String query) {
+        if (!mToppingList.isEmpty()) {
+            recyclerAdapter.updateList(filter(query));
         }
+        return true;
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        return false;
+    }
+
+    private List<Topping> filter(String query) {
+        query = query.toLowerCase();
+        final List<Topping> filteredModelList = new ArrayList<>();
+        for (Topping model : mToppingList) {
+            final String text = model.getName().toLowerCase();
+            if (text.contains(query)) {
+                filteredModelList.add(model);
+            }
+        }
+        return filteredModelList;
     }
 }

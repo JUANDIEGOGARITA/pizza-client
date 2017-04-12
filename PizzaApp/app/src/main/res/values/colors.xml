@@ -2,9 +2,10 @@
 <resources>
     <color name="colorPrimary">#b22222</color>
     <color name="colorPrimaryDark">#660000</color>
-    <color name="colorAccent">#F5F5DC</color>
+    <color name="colorAccent">#FFFF</color>
     <color name="almostWhite">#a9a9a9</color>
     <color name="main_background">#a9a9a9</color>
     <color name="item_background">#2e2e2e</color>
     <color name="add_topping_title_background">#552e2e2e</color>
+    <color name="main_background_principal">#D9000000</color>
 </resources>

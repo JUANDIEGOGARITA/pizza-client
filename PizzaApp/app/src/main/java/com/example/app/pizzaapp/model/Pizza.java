@@ -49,6 +49,12 @@ public class Pizza extends Product implements Parcelable {
         this.mDescription = in.readString();
     }
 
+    public Pizza(String name, String mDescription) {
+        this.mId = null;
+        this.mName = name;
+        this.mDescription = mDescription;
+    }
+
     public static final Parcelable.Creator<Pizza> CREATOR = new Parcelable.Creator<Pizza>() {
         @Override
         public Pizza createFromParcel(Parcel source) {

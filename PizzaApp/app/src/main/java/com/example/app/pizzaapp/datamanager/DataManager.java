@@ -6,6 +6,7 @@ import android.util.Log;
 import com.example.app.pizzaapp.R;
 import com.example.app.pizzaapp.model.GetToppingByPizzaResult;
 import com.example.app.pizzaapp.model.Pizza;
+import com.example.app.pizzaapp.model.PostPizza;
 import com.example.app.pizzaapp.model.PostTopping;
 import com.example.app.pizzaapp.model.PostToppingByPizza;
 import com.example.app.pizzaapp.model.PostToppingByPizzaResult;
@@ -40,7 +41,8 @@ public class DataManager {
         call.enqueue(new Callback<List<Pizza>>() {
             @Override
             public void onResponse(Call<List<Pizza>> call, Response<List<Pizza>> response) {
-                listener.onSuccess(response.body());
+
+                listener.onSuccess(response.code(), response.body());
             }
 
             @Override
@@ -58,7 +60,7 @@ public class DataManager {
         call.enqueue(new Callback<List<Topping>>() {
             @Override
             public void onResponse(Call<List<Topping>> call, Response<List<Topping>> response) {
-                listener.onSuccess(response.body());
+                listener.onSuccess(response.code(), response.body());
             }
 
             @Override
@@ -75,7 +77,7 @@ public class DataManager {
         call.enqueue(new Callback<List<GetToppingByPizzaResult>>() {
             @Override
             public void onResponse(Call<List<GetToppingByPizzaResult>> call, Response<List<GetToppingByPizzaResult>> response) {
-                listener.onSuccess(response.body());
+                listener.onSuccess(response.code(), response.body());
             }
 
             @Override
@@ -93,7 +95,7 @@ public class DataManager {
         call.enqueue(new Callback<Topping>() {
             @Override
             public void onResponse(Call<Topping> call, Response<Topping> response) {
-                listener.onSuccess(response.body());
+                listener.onSuccess(response.code(), response.body());
             }
 
             @Override
@@ -103,14 +105,16 @@ public class DataManager {
         });
     }
 
-    public void postPizza(Pizza pizza, final ServiceCallback listener) {
+    public void postPizza(PostPizza pizza, final ServiceCallback listener) {
         DataManagerInterface apiService =
                 BaseManager.getClient(mBaseUrl).create(DataManagerInterface.class);
         Call<Pizza> call = apiService.postPizza(pizza);
+        Log.d("JD", call.request().toString());
+        Log.d("JD", bodyToString(call.request().body()));
         call.enqueue(new Callback<Pizza>() {
             @Override
             public void onResponse(Call<Pizza> call, Response<Pizza> response) {
-                listener.onSuccess(response.body());
+                listener.onSuccess(response.code(), response.body());
             }
 
             @Override
@@ -143,7 +147,7 @@ public class DataManager {
         call.enqueue(new Callback<PostToppingByPizzaResult>() {
             @Override
             public void onResponse(Call<PostToppingByPizzaResult> call, Response<PostToppingByPizzaResult> response) {
-                listener.onSuccess(response.body());
+                listener.onSuccess(response.code(), response.body());
             }
 
             @Override

@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.app.pizzaapp.R;
+import com.example.app.pizzaapp.model.Pizza;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,8 +41,8 @@ public class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRecyclerAda
         return items.size();
     }
 
-    public void updateList(List<T> thingList) {
-        this.items = thingList;
+    public void updateList(List<T> productList) {
+        this.items = productList;
         notifyDataSetChanged();
     }
 
