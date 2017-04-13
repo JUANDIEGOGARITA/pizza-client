@@ -38,14 +38,21 @@ public class Pizza extends Product implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeInt(this.mId);
+        parcel.writeString(this.mId);
         parcel.writeString(this.mName);
         parcel.writeString(this.mDescription);
     }
 
     protected Pizza(Parcel in) {
-        this.mId = in.readInt();
+        this.mId = in.readString();
         this.mName = in.readString();
+        this.mDescription = in.readString();
+    }
+
+    public Pizza(String name, String mDescription) {
+        this.mId = null;
+        this.mName = name;
+        this.mDescription = mDescription;
     }
 
     public static final Parcelable.Creator<Pizza> CREATOR = new Parcelable.Creator<Pizza>() {

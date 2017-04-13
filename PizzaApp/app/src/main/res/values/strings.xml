@@ -1,3 +1,20 @@
 <resources>
     <string name="app_name">PizzaApp</string>
+    <string name="base_url">http://192.168.99.100:3000/</string>
+    <string name="internet_connected">Internet Connected</string>
+    <string name="lost_internet_connection"> Lost Internet Connection</string>
+
+    <string name="about"><u>About</u></string>
+    <string name="add_topping_title">Create your own</string>
+    <string name="add_topping_description">Add your favorite topping, for starting adding some flavor to your own creation.</string>
+    <string name="add_pizza_description">Add your favorite pizza for starting your own creation.</string>
+
+<!--Navigator Params-->
+
+    <string name="title_element">title_element</string>
+    <string name="detail_element">detail_element</string>
+    <string name="fragment_resource_id">fragment_resource_id</string>
+    <string name="product_name_list">product_name_list</string>
+    <string name="internal_server_error">Internal Server Error</string>
+
 </resources>
