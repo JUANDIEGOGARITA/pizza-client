@@ -141,7 +141,7 @@ public class PizzaDetailFragment extends TransitionUtil.BaseFragment implements 
                 if (mRefreshLayout.isRefreshing()) {
                     mRefreshLayout.setRefreshing(false);
                 }
-                toppingList = new ArrayList<Topping>();
+                toppingList = new ArrayList<>();
                 mErrorView.setVisibility(View.GONE);
                 recyclerView.setVisibility(View.VISIBLE);
 
@@ -152,26 +152,20 @@ public class PizzaDetailFragment extends TransitionUtil.BaseFragment implements 
                         toppingList.add(new Topping(model.getId(), model.getName()));
                         listIds.add(model.getToppingId());
                     }
-                  /*  for (int i = 0; i < getToppingByPizzaResultList.size(); i++) {
-                        GetToppingByPizzaResult g = getToppingByPizzaResultList.get(i);
-                        toppingList.add(i, new Topping(g.getId(), g.getName()));
-                        listIds.add(getToppingByPizzaResultList.get(i).getToppingId());
-                    }*/
                     if (toppingList.isEmpty()) {
-                        mEmptyView.setVisibility(View.VISIBLE);
-                        recyclerView.setVisibility(View.GONE);
+                        showEmptyView();
                     } else {
                         mEmptyView.setVisibility(View.GONE);
                         recyclerAdapter.updateList(toppingList);
                     }
                 } else {
-                    showEmptyOrErrorView(status.toString() + " Internal Server Error");
+                    showErrorView(status.toString() + " " + getString(R.string.internal_server_error));
                 }
             }
 
             @Override
             public void onError(Object networkError) {
-                showEmptyOrErrorView(networkError.toString());
+                showErrorView(networkError.toString());
             }
 
             @Override
@@ -189,11 +183,8 @@ public class PizzaDetailFragment extends TransitionUtil.BaseFragment implements 
         MainActivity.of(getActivity()).getFabButton().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                int cx = v.getLeft() + (v.getWidth() / 2); //middle of button
-                int cy = v.getTop() + (v.getHeight() / 2); //middle of button
-                int radius = (int) Math.sqrt(Math.pow(cx, 2) + Math.pow(cy, 2)); //hypotenuse to top left
                 Navigator.launchToppingList(MainActivity.of(getActivity()), "Add toppings to your Pizza",
-                        v, cx, cy, radius, R.layout.fragment_topping_list, pizzaId, listIds);
+                        v, R.layout.fragment_topping_list, pizzaId, listIds);
             }
         });
     }
@@ -224,7 +215,6 @@ public class PizzaDetailFragment extends TransitionUtil.BaseFragment implements 
 
     @Override
     public void onBeforeEnter(View contentView) {
-       // detail_layout.setVisibility(View.INVISIBLE);
         MainActivity.of(getActivity()).getFragmentBackground().animate().scaleX(.92f).scaleY(.92f).alpha(.6f).setDuration(Navigator.ANIM_DURATION).setInterpolator(new AccelerateInterpolator()).start();
         MainActivity.of(getActivity()).animateHomeIcon(MaterialMenuDrawable.IconState.ARROW);
     }
@@ -245,7 +235,7 @@ public class PizzaDetailFragment extends TransitionUtil.BaseFragment implements 
             MainActivity.of(getActivity()).getFabButton().setEnabled(true);
             loadToppingsByPizza();
         } else {
-            showEmptyOrErrorView("No internet connection available");
+            showErrorView("No internet connection available");
             MainActivity.of(getActivity()).getFabButton().setEnabled(false);
             if (!MainActivity.of(getActivity()).getSnackBar().isShown()) {
                 MainActivity.of(getActivity()).getSnackBar().show();
@@ -253,11 +243,15 @@ public class PizzaDetailFragment extends TransitionUtil.BaseFragment implements 
         }
     }
 
-    public void showEmptyOrErrorView(String message) {
+    public void showErrorView(String message) {
         recyclerView.setVisibility(View.GONE);
         mErrorView.setVisibility(View.VISIBLE);
         error_message.setText(message);
+    }
 
+    private void showEmptyView() {
+        mEmptyView.setVisibility(View.VISIBLE);
+        recyclerView.setVisibility(View.GONE);
     }
 
     private void initSearchView() {

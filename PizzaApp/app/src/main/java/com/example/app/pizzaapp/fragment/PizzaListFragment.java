@@ -21,10 +21,10 @@ import com.example.app.pizzaapp.adapter.BaseRecyclerAdapter;
 import com.example.app.pizzaapp.adapter.PizzaRecyclerAdapter;
 import com.example.app.pizzaapp.datamanager.DataManager;
 import com.example.app.pizzaapp.datamanager.ServiceCallback;
-import com.example.app.pizzaapp.util.TransitionUtil;
 import com.example.app.pizzaapp.model.Pizza;
 import com.example.app.pizzaapp.util.AppContants;
 import com.example.app.pizzaapp.util.Navigator;
+import com.example.app.pizzaapp.util.TransitionUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +47,10 @@ public class PizzaListFragment extends TransitionUtil.BaseFragment implements Se
     RelativeLayout main_view;
 
     @Bind(R.id.empty_view)
-    RelativeLayout empty_view;
+    RelativeLayout mEmptyView;
+
+    @Bind(R.id.error_view)
+    RelativeLayout mErrorView;
 
     @Bind(R.id.error_message)
     TextView error_message;
@@ -119,7 +122,7 @@ public class PizzaListFragment extends TransitionUtil.BaseFragment implements Se
                 if (isLongClick) {
                     MainActivity.of(getActivity()).animateHomeIcon(MaterialMenuDrawable.IconState.X);
                 } else {
-                    Navigator.launchDetail(MainActivity.of(getActivity()), view, item, recyclerView);
+                    Navigator.launchDetailProductFragment(MainActivity.of(getActivity()), view, item, recyclerView);
                 }
             }
         });
@@ -130,7 +133,8 @@ public class PizzaListFragment extends TransitionUtil.BaseFragment implements Se
         MainActivity.of(getActivity()).getFabButton().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Navigator.launchAddPizzaFragment(MainActivity.of(getActivity()), v, getActivity().findViewById(R.id.base_fragment_container), getPizzaNameList());
+                Navigator.launchAddProductFragment(MainActivity.of(getActivity()),
+                        getActivity().findViewById(R.id.base_fragment_container), getPizzaNameList(), R.layout.fragment_add_pizza);
             }
         });
     }
@@ -147,7 +151,7 @@ public class PizzaListFragment extends TransitionUtil.BaseFragment implements Se
 
     @Override
     public void onBeforeViewShows(View contentView) {
-        ViewCompat.setTransitionName(((MainActivity) getActivity()).getToolbarTitle(), "title_element");
+        ViewCompat.setTransitionName(((MainActivity) getActivity()).getToolbarTitle(), getString(R.string.title_element));
         ViewCompat.setTransitionName(main_view, "option_wrapper");
 
         TransitionUtil.excludeEnterTarget(getActivity(), R.id.toolbar_container, true);
@@ -168,7 +172,6 @@ public class PizzaListFragment extends TransitionUtil.BaseFragment implements Se
         MainActivity.of(getActivity()).animateHomeIcon(MaterialMenuDrawable.IconState.ARROW);
     }
 
-
     public void loadPizzas() {
         if (isInternetAvailable()) {
             mRefreshLayout.setRefreshing(true);
@@ -178,19 +181,24 @@ public class PizzaListFragment extends TransitionUtil.BaseFragment implements Se
                     if (mRefreshLayout.isRefreshing()) {
                         mRefreshLayout.setRefreshing(false);
                     }
-                    empty_view.setVisibility(View.GONE);
+                    mErrorView.setVisibility(View.GONE);
                     recyclerView.setVisibility(View.VISIBLE);
                     if (Integer.parseInt(status.toString()) == AppContants.OK_HTTP_RESPONSE) {
                         pizzaList = (List<Pizza>) response;
-                        recyclerAdapter.updateList(pizzaList);
+                        if (pizzaList.isEmpty()) {
+                            showEmptyView();
+                        } else {
+                            mEmptyView.setVisibility(View.GONE);
+                            recyclerAdapter.updateList(pizzaList);
+                        }
                     } else {
-                        showEmptyOrErrorView(status.toString() + " Internal Server Error");
+                        showErrorView(status.toString() + " " + getString(R.string.internal_server_error));
                     }
                 }
 
                 @Override
                 public void onError(Object networkError) {
-                    showEmptyOrErrorView(networkError.toString());
+                    showErrorView(networkError.toString());
                 }
 
                 @Override
@@ -204,11 +212,15 @@ public class PizzaListFragment extends TransitionUtil.BaseFragment implements Se
     }
 
 
-    public void showEmptyOrErrorView(String message) {
+    public void showErrorView(String message) {
         recyclerView.setVisibility(View.GONE);
-        empty_view.setVisibility(View.VISIBLE);
+        mErrorView.setVisibility(View.VISIBLE);
         error_message.setText(message);
+    }
 
+    private void showEmptyView() {
+        mEmptyView.setVisibility(View.VISIBLE);
+        recyclerView.setVisibility(View.GONE);
     }
 
     @Override
@@ -217,7 +229,7 @@ public class PizzaListFragment extends TransitionUtil.BaseFragment implements Se
             MainActivity.of(getActivity()).getFabButton().setEnabled(true);
             loadPizzas();
         } else {
-            showEmptyOrErrorView("No internet connection available");
+            showErrorView("No internet connection available");
             MainActivity.of(getActivity()).getFabButton().setEnabled(false);
             if (!MainActivity.of(getActivity()).getSnackBar().isShown()) {
                 MainActivity.of(getActivity()).getSnackBar().show();

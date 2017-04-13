@@ -53,13 +53,18 @@ public class ToppingListFragment extends TransitionUtil.BaseFragment implements 
     RelativeLayout main_view;
 
     @Bind(R.id.empty_view)
-    RelativeLayout empty_view;
+    RelativeLayout mEmptyView;
+
+    @Bind(R.id.no_toppings_title)
+    TextView mEmptyTile;
+
+    @Bind(R.id.error_view)
+    RelativeLayout mErrorView;
 
     @Bind(R.id.error_message)
     TextView error_message;
     ToppingRecyclerAdapter recyclerAdapter;
 
-    int a, b, c;
     List<Integer> toppingIdList, toppingIdListByPizza;
     ArrayList<Topping> mToppingList;
 
@@ -111,10 +116,6 @@ public class ToppingListFragment extends TransitionUtil.BaseFragment implements 
         View rootView = inflater.inflate(R.layout.fragment_topping_list, container, false);
         ButterKnife.bind(this, rootView);
         toppingIdList = new ArrayList<>();
-        a = getActivity().getIntent().getIntExtra("a", 0);
-        b = getActivity().getIntent().getIntExtra("b", 0);
-        c = getActivity().getIntent().getIntExtra("c", 0);
-        //TODO GET FLAG EXTRA
         itemDescription = getActivity().getIntent().getStringExtra("item_text");
         mPizzaId = getActivity().getIntent().getIntExtra("pizzaId", -1);
         toppingIdListByPizza = getActivity().getIntent().getIntegerArrayListExtra("toppingIds");
@@ -192,7 +193,8 @@ public class ToppingListFragment extends TransitionUtil.BaseFragment implements 
                 if (!toppingIdList.isEmpty()) {
                     postToppingsByPizza();
                 } else {
-                    Navigator.launchAddToppingFragment(MainActivity.of(getActivity()), v, getActivity().findViewById(R.id.base_fragment_container), getToppingNameList());
+                    Navigator.launchAddProductFragment(MainActivity.of(getActivity()),
+                            getActivity().findViewById(R.id.base_fragment_container), getToppingNameList(), R.layout.fragment_add_topping);
                 }
             }
         });
@@ -217,29 +219,33 @@ public class ToppingListFragment extends TransitionUtil.BaseFragment implements 
                     if (mRefreshLayout.isRefreshing()) {
                         mRefreshLayout.setRefreshing(false);
                     }
-                    empty_view.setVisibility(View.GONE);
+                    mErrorView.setVisibility(View.GONE);
                     recyclerView.setVisibility(View.VISIBLE);
 
                     if (Integer.parseInt(status.toString()) == AppContants.OK_HTTP_RESPONSE) {
                         mToppingList = (ArrayList<Topping>) response;
-                        ArrayList<Topping> responseList = mToppingList;
 
-
-                        ArrayList<Topping> listToDisplay = getFilteredByPizzaId(mPizzaId, responseList);
-                        if (listToDisplay.isEmpty()) {
-                            showEmptyOrErrorView("No more toppings to add");
+                        if (mToppingList.isEmpty()) {
+                            showEmptyView();
                         } else {
-                            recyclerAdapter.updateList(listToDisplay);
+                            mEmptyView.setVisibility(View.GONE);
+                            ArrayList<Topping> responseList = mToppingList;
+                            ArrayList<Topping> listToDisplay = getFilteredByPizzaId(mPizzaId, responseList);
+                            if (listToDisplay.isEmpty()) {
+                                showEmptyView("No more toppings available \n Add a new one here");
+                            } else {
+                                recyclerAdapter.updateList(listToDisplay);
+                            }
                         }
 
                     } else {
-                        showEmptyOrErrorView(status.toString() + " Internal Server Error");
+                        showErrorView(status.toString() + " " + getString(R.string.internal_server_error));
                     }
                 }
 
                 @Override
                 public void onError(Object networkError) {
-                    showEmptyOrErrorView(networkError.toString());
+                    showErrorView(networkError.toString());
                 }
 
                 @Override
@@ -309,12 +315,11 @@ public class ToppingListFragment extends TransitionUtil.BaseFragment implements 
                 @Override
                 public void onSuccess(Object status, Object response) {
                     if (Integer.parseInt(status.toString()) == AppContants.OK_HTTP_RESPONSE) {
-                        //TODO ADD ERROR VALIDATION
                         if (isLastOne) {
                             MainActivity.of(getActivity()).goBack();
                         }
                     } else {
-                        showErrorDialog(status.toString() + " Internal Server Error");
+                        showErrorView(status.toString() + " " + getString(R.string.internal_server_error));
                     }
                 }
 
@@ -333,7 +338,7 @@ public class ToppingListFragment extends TransitionUtil.BaseFragment implements 
 
     @Override
     public void onBeforeViewShows(View contentView) {
-        ViewCompat.setTransitionName(((MainActivity) getActivity()).getToolbarTitle(), "title_element");
+        ViewCompat.setTransitionName(((MainActivity) getActivity()).getToolbarTitle(), getString(R.string.title_element));
         ViewCompat.setTransitionName(main_view, "option_wrapper");
 
         TransitionUtil.excludeEnterTarget(getActivity(), R.id.toolbar_container, true);
@@ -345,7 +350,6 @@ public class ToppingListFragment extends TransitionUtil.BaseFragment implements 
         MainActivity.of(getActivity()).animateHomeIcon(MaterialMenuDrawable.IconState.ARROW);
         TransitionUtil.fadeThenFinish(recyclerView, getActivity());
         TransitionUtil.fadeThenFinish(MainActivity.of(getActivity()).getFabButton(), getActivity());
-
         return false;
     }
 
@@ -364,12 +368,24 @@ public class ToppingListFragment extends TransitionUtil.BaseFragment implements 
         loadToppings();
     }
 
-    public void showEmptyOrErrorView(String message) {
+    public void showErrorView(String message) {
         recyclerView.setVisibility(View.GONE);
-        empty_view.setVisibility(View.VISIBLE);
+        mErrorView.setVisibility(View.VISIBLE);
         error_message.setText(message);
-
     }
+
+    private void showEmptyView(String title) {
+        mEmptyView.setVisibility(View.VISIBLE);
+        recyclerView.setVisibility(View.GONE);
+        if (title != null) {
+            mEmptyTile.setText(title);
+        }
+    }
+
+    private void showEmptyView() {
+        showEmptyView(null);
+    }
+
 
     private void validateFabButtonState() {
         if (toppingIdList.isEmpty()) {
@@ -388,7 +404,7 @@ public class ToppingListFragment extends TransitionUtil.BaseFragment implements 
             MainActivity.of(getActivity()).getFabButton().setEnabled(true);
             loadToppings();
         } else {
-            showEmptyOrErrorView("No internet connection available");
+            showErrorView("No internet connection available");
             MainActivity.of(getActivity()).getFabButton().setEnabled(false);
             if (!MainActivity.of(getActivity()).getSnackBar().isShown()) {
                 MainActivity.of(getActivity()).getSnackBar().show();

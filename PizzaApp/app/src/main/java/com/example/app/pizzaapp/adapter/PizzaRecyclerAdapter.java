@@ -4,12 +4,9 @@ import android.support.v7.widget.AppCompatTextView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.example.app.pizzaapp.R;
 import com.example.app.pizzaapp.model.Pizza;
-
-import java.util.List;
 
 import butterknife.Bind;
 
@@ -27,17 +24,17 @@ public class PizzaRecyclerAdapter extends BaseRecyclerAdapter<Pizza> {
 
     public class PizzaHolder extends BaseRecyclerAdapter<Pizza>.ViewHolder {
         @Bind(R.id.title)
-        AppCompatTextView titleTextView;
+        AppCompatTextView mTitleTextView;
         @Bind(R.id.description)
-        AppCompatTextView descriptionView;
+        AppCompatTextView mDescriptionView;
 
         public PizzaHolder(View itemView) {
             super(itemView);
         }
 
         public void populate(Pizza item) {
-            titleTextView.setText(item.getName());
-            descriptionView.setText(item.getDescription());
+            mTitleTextView.setText(item.getName());
+            mDescriptionView.setText(item.getDescription());
         }
     }
 }

@@ -1,8 +1,6 @@
 package com.example.app.pizzaapp.util;
 
-
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -32,15 +30,15 @@ public class Navigator {
 
     public static int ANIM_DURATION = 350;
 
-    public static void launchDetail(MainActivity fromActivity, View fromView, Pizza item,
-                                    View backgroundView) {
-        ViewCompat.setTransitionName(fromView, "detail_element");
+    public static void launchDetailProductFragment(MainActivity fromActivity, View fromView, Pizza item,
+                                                   View backgroundView) {
+        ViewCompat.setTransitionName(fromView, fromActivity.getString(R.string.detail_element));
         ViewCompat.setTransitionName(fromActivity.findViewById(R.id.fab), "fab");
         ViewCompat.setTransitionName(fromView.findViewById(R.id.title), "detail_title");
         ActivityOptionsCompat options =
                 TransitionUtil.makeOptionsCompat(
                         fromActivity,
-                        Pair.create(fromView, "detail_element"),
+                        Pair.create(fromView, fromActivity.getString(R.string.detail_element)),
                         Pair.create(fromActivity.findViewById(R.id.fab), "fab"),
                         Pair.create(fromView.findViewById(R.id.title), "detail_title")
                 );
@@ -48,7 +46,7 @@ public class Navigator {
         intent.putExtra("item_text", item.getName());
         intent.putExtra("pizza_id", item.getId());
         intent.putExtra("item_description", item.getDescription());
-        intent.putExtra("fragment_resource_id", R.layout.fragment_pizza_detail);
+        intent.putExtra(fromActivity.getString(R.string.fragment_resource_id), R.layout.fragment_pizza_detail);
 
         if (backgroundView != null)
             BitmapUtil.storeBitmapInIntent(BitmapUtil.createBitmap(backgroundView), intent);
@@ -58,49 +56,15 @@ public class Navigator {
         fromActivity.overridePendingTransition(R.anim.slide_up, R.anim.scale_down);
     }
 
-    public static void launchOverlay(MainActivity fromActivity, View fromView, View backgroundView) {
+    public static void launchAddProductFragment(MainActivity fromActivity, View backgroundView,
+                                                ArrayList<String> productNameList, int fragmentResourceId) {
         ActivityOptionsCompat options =
                 TransitionUtil.makeOptionsCompat(
                         fromActivity
                 );
         Intent intent = new Intent(fromActivity, MainActivity.class);
-        intent.putExtra("fragment_resource_id", R.layout.fragment_overaly);
-
-        if (backgroundView != null)
-            BitmapUtil.storeBitmapInIntent(BitmapUtil.createBitmap(backgroundView), intent);
-
-        ActivityCompat.startActivity(fromActivity, intent, options.toBundle());
-
-        fromActivity.overridePendingTransition(R.anim.slide_up, R.anim.scale_down);
-    }
-
-    public static void launchAddPizzaFragment(MainActivity fromActivity, View fromView, View backgroundView,
-                                              ArrayList<String> pizzaNameList) {
-        ActivityOptionsCompat options =
-                TransitionUtil.makeOptionsCompat(
-                        fromActivity
-                );
-        Intent intent = new Intent(fromActivity, MainActivity.class);
-        intent.putExtra("fragment_resource_id", R.layout.fragment_add_pizza);
-        intent.putStringArrayListExtra("pizza_name_list", pizzaNameList);
-
-        if (backgroundView != null)
-            BitmapUtil.storeBitmapInIntent(BitmapUtil.createBitmap(backgroundView), intent);
-
-        ActivityCompat.startActivity(fromActivity, intent, options.toBundle());
-
-        fromActivity.overridePendingTransition(R.anim.slide_up, R.anim.scale_down);
-    }
-
-    public static void launchAddToppingFragment(MainActivity fromActivity, View fromView, View backgroundView,
-                                                ArrayList<String> toppingNameList) {
-        ActivityOptionsCompat options =
-                TransitionUtil.makeOptionsCompat(
-                        fromActivity
-                );
-        Intent intent = new Intent(fromActivity, MainActivity.class);
-        intent.putExtra("fragment_resource_id", R.layout.fragment_add_topping);
-        intent.putStringArrayListExtra("topping_name_list", toppingNameList);
+        intent.putExtra(fromActivity.getString(R.string.fragment_resource_id), fragmentResourceId);
+        intent.putStringArrayListExtra(fromActivity.getString(R.string.product_name_list), productNameList);
 
         if (backgroundView != null)
             BitmapUtil.storeBitmapInIntent(BitmapUtil.createBitmap(backgroundView), intent);
@@ -111,37 +75,34 @@ public class Navigator {
     }
 
     public static void launchList(MainActivity fromActivity, String title, View fromView, int layout, View optionWrapper) {
-        ViewCompat.setTransitionName(fromView, "title_element");
+        ViewCompat.setTransitionName(fromView, fromActivity.getString(R.string.title_element));
         ViewCompat.setTransitionName(optionWrapper, "option_wrapper");
         ActivityOptionsCompat options =
                 TransitionUtil.makeOptionsCompat(
                         fromActivity,
-                        Pair.create(fromView, "title_element"),
+                        Pair.create(fromView, fromActivity.getString(R.string.title_element)),
                         Pair.create(optionWrapper, "option_wrapper")
                 );
         Intent intent = new Intent(fromActivity, MainActivity.class);
         intent.putExtra("item_text", title);
-        intent.putExtra("fragment_resource_id", layout);
+        intent.putExtra(fromActivity.getString(R.string.fragment_resource_id), layout);
 
         BitmapUtil.storeBitmapInIntent(BitmapUtil.createBitmap(fromActivity.findViewById(R.id.base_fragment_container)), intent);
         ActivityCompat.startActivity(fromActivity, intent, options.toBundle());
         fromActivity.overridePendingTransition(R.anim.slide_up, R.anim.scale_down);
     }
 
-    public static void launchToppingList(MainActivity fromActivity, String title, View fromView, int a, int b, int c, int layout, int pizzaId,
+    public static void launchToppingList(MainActivity fromActivity, String title, View fromView, int layout, int pizzaId,
                                          ArrayList<Integer> toppingsIds) {
-        ViewCompat.setTransitionName(fromView, "title_element");
+        ViewCompat.setTransitionName(fromView, fromActivity.getString(R.string.title_element));
         ActivityOptionsCompat options =
                 TransitionUtil.makeOptionsCompat(
                         fromActivity,
-                        Pair.create(fromView, "title_element")
+                        Pair.create(fromView, fromActivity.getString(R.string.title_element))
                 );
         Intent intent = new Intent(fromActivity, MainActivity.class);
         intent.putExtra("item_text", title);
-        intent.putExtra("fragment_resource_id", layout);
-        intent.putExtra("a", a);
-        intent.putExtra("b", b);
-        intent.putExtra("c", c);
+        intent.putExtra(fromActivity.getString(R.string.fragment_resource_id), layout);
         intent.putExtra("pizzaId", pizzaId);
         intent.putIntegerArrayListExtra("toppingIds", toppingsIds);
 
@@ -149,8 +110,8 @@ public class Navigator {
         fromActivity.overridePendingTransition(R.anim.slide_up, R.anim.scale_down);
     }
 
-    public static TransitionUtil.BaseFragment getBaseFragment(Activity activity) {
-        int fragmentResourceId = activity.getIntent().getIntExtra("fragment_resource_id", 0);
+    public static TransitionUtil.BaseFragment getBaseFragment(Activity fromActivity) {
+        int fragmentResourceId = fromActivity.getIntent().getIntExtra(fromActivity.getString(R.string.fragment_resource_id), 0);
         switch (fragmentResourceId) {
             case R.layout.fragment_pizza_list:
                 return new PizzaListFragment();
@@ -167,9 +128,9 @@ public class Navigator {
         }
     }
 
-    public static void setBaseFragment(FragmentActivity activity, TransitionUtil.BaseFragment fragment) {
+    public static void setBaseFragment(FragmentActivity fromActivity, TransitionUtil.BaseFragment fragment) {
         if (fragment == null) return;
-        FragmentTransaction transaction = activity.getSupportFragmentManager().beginTransaction();
+        FragmentTransaction transaction = fromActivity.getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.base_fragment, fragment, AppContants.BASE_FRAGMENT);
         transaction.commit();
     }

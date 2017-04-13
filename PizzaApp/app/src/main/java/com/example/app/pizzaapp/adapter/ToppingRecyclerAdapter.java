@@ -19,15 +19,15 @@ import butterknife.Bind;
 
 public class ToppingRecyclerAdapter extends BaseRecyclerAdapter<Topping> {
 
-    boolean mIsCheckAvailable = false;
-    CheckListener mListener;
-    public ToppingRecyclerAdapter(CheckListener listener, boolean isCheckAvailable){
+    private boolean mIsCheckAvailable = false;
+    private CheckListener mListener;
+
+    public ToppingRecyclerAdapter(CheckListener listener, boolean isCheckAvailable) {
         this.mIsCheckAvailable = isCheckAvailable;
         this.mListener = listener;
     }
 
-    public ToppingRecyclerAdapter(){
-
+    public ToppingRecyclerAdapter() {
     }
 
     @Override
@@ -48,15 +48,15 @@ public class ToppingRecyclerAdapter extends BaseRecyclerAdapter<Topping> {
 
         public void populate(final Topping item) {
             mTitle.setText(item.getName());
-            if(mIsCheckAvailable){
+            if (mIsCheckAvailable) {
                 mCheck.setVisibility(View.VISIBLE);
             }
             mCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                    if(b){
+                    if (b) {
                         mListener.onToppingChecked(Integer.parseInt(item.getId()));
-                    }else{
+                    } else {
                         mListener.onToppingUnChecked(Integer.parseInt(item.getId()));
                     }
                 }
@@ -64,4 +64,3 @@ public class ToppingRecyclerAdapter extends BaseRecyclerAdapter<Topping> {
         }
     }
 }
-

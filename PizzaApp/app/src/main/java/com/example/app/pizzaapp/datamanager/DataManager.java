@@ -1,7 +1,6 @@
 package com.example.app.pizzaapp.datamanager;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.example.app.pizzaapp.R;
 import com.example.app.pizzaapp.model.GetToppingByPizzaResult;
@@ -12,11 +11,8 @@ import com.example.app.pizzaapp.model.PostToppingByPizza;
 import com.example.app.pizzaapp.model.PostToppingByPizzaResult;
 import com.example.app.pizzaapp.model.Topping;
 
-import java.io.IOException;
 import java.util.List;
 
-import okhttp3.RequestBody;
-import okio.Buffer;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -91,7 +87,6 @@ public class DataManager {
         DataManagerInterface apiService =
                 BaseManager.getClient(mBaseUrl).create(DataManagerInterface.class);
         Call<Topping> call = apiService.postTopping(topping);
-        Log.d("JD", call.request().toString());
         call.enqueue(new Callback<Topping>() {
             @Override
             public void onResponse(Call<Topping> call, Response<Topping> response) {
@@ -109,8 +104,6 @@ public class DataManager {
         DataManagerInterface apiService =
                 BaseManager.getClient(mBaseUrl).create(DataManagerInterface.class);
         Call<Pizza> call = apiService.postPizza(pizza);
-        Log.d("JD", call.request().toString());
-        Log.d("JD", bodyToString(call.request().body()));
         call.enqueue(new Callback<Pizza>() {
             @Override
             public void onResponse(Call<Pizza> call, Response<Pizza> response) {
@@ -124,26 +117,10 @@ public class DataManager {
         });
     }
 
-    private String bodyToString(final RequestBody request) {
-        try {
-            final RequestBody copy = request;
-            final Buffer buffer = new Buffer();
-            if (copy != null)
-                copy.writeTo(buffer);
-            else
-                return "";
-            return buffer.readUtf8();
-        } catch (final IOException e) {
-            return "did not work";
-        }
-    }
-
     public void postToppingByPizza(int pizzaId, PostToppingByPizza topping, final ServiceCallback listener) {
         DataManagerInterface apiService =
                 BaseManager.getClient(mBaseUrl).create(DataManagerInterface.class);
         Call<PostToppingByPizzaResult> call = apiService.postToppingByPizza(pizzaId, topping);
-        Log.d("JD", topping.toString());
-        Log.d("JD", bodyToString(call.request().body()));
         call.enqueue(new Callback<PostToppingByPizzaResult>() {
             @Override
             public void onResponse(Call<PostToppingByPizzaResult> call, Response<PostToppingByPizzaResult> response) {

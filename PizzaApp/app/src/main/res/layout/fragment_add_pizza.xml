@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/overlay"
+    android:id="@+id/main_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/main_background"
@@ -26,7 +26,7 @@
             android:background="@color/add_topping_title_background">
 
             <android.support.v7.widget.AppCompatTextView
-                android:id="@+id/title"
+                android:id="@+id/add_pizza_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
@@ -35,6 +35,7 @@
                 android:textColor="@android:color/white"
                 android:textStyle="bold" />
         </RelativeLayout>
+
     </RelativeLayout>
 
     <RelativeLayout
@@ -43,7 +44,6 @@
         android:layout_margin="10dp"
         android:background="@drawable/item_background"
         android:padding="10dp">
-
 
         <android.support.v7.widget.AppCompatTextView
             android:id="@+id/pizza_description_title"
@@ -71,8 +71,8 @@
                 android:imeOptions="actionDone"
                 android:inputType="none"
                 android:textColor="@android:color/white" />
-        </android.support.design.widget.TextInputLayout>
 
+        </android.support.design.widget.TextInputLayout>
 
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
@@ -92,7 +92,9 @@
                 android:imeOptions="actionDone"
                 android:inputType="none"
                 android:textColor="@android:color/white" />
+
         </android.support.design.widget.TextInputLayout>
 
     </RelativeLayout>
+
 </LinearLayout>

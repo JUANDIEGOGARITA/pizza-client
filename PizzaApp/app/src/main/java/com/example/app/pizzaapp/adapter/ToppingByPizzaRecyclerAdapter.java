@@ -23,14 +23,14 @@ public class ToppingByPizzaRecyclerAdapter extends BaseRecyclerAdapter<String> {
 
     public class ToppingByPizzaHolder extends BaseRecyclerAdapter<String>.ViewHolder {
         @Bind(R.id.title)
-        TextView titleTextView;
+        TextView mTitleTextView;
 
         public ToppingByPizzaHolder(View itemView) {
             super(itemView);
         }
 
         public void populate(String item) {
-            titleTextView.setText(item);
+            mTitleTextView.setText(item);
         }
     }
 }

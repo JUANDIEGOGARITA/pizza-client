@@ -1,15 +1,12 @@
 package com.example.app.pizzaapp.adapter;
 
 import android.support.v7.widget.RecyclerView;
-import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.app.pizzaapp.R;
-import com.example.app.pizzaapp.model.Pizza;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -20,9 +17,8 @@ import butterknife.ButterKnife;
  */
 
 public class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRecyclerAdapter<T>.ViewHolder> {
-    private List<T> items = Collections.emptyList();
-    private SparseBooleanArray selectedItems;
-    private OnItemClickListener<T> onItemClickListener;
+    private List<T> mItems = Collections.emptyList();
+    private OnItemClickListener<T> mOnItemClickListener;
 
 
     @Override
@@ -33,56 +29,30 @@ public class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRecyclerAda
 
     @Override
     public void onBindViewHolder(BaseRecyclerAdapter<T>.ViewHolder holder, int position) {
-        holder.populate(items.get(position));
+        holder.populate(mItems.get(position));
     }
 
     @Override
     public int getItemCount() {
-        return items.size();
+        return mItems.size();
     }
 
     public void updateList(List<T> productList) {
-        this.items = productList;
+        this.mItems = productList;
         notifyDataSetChanged();
     }
 
-    public void toggleSelection(int pos) {
-        if (selectedItems.get(pos, false)) {
-            selectedItems.delete(pos);
-        }
-        else {
-            selectedItems.put(pos, true);
-        }
-        notifyItemChanged(pos);
-    }
 
-    public void clearSelections() {
-        selectedItems.clear();
-        notifyDataSetChanged();
-    }
-
-    public int getSelectedItemCount() {
-        return selectedItems.size();
-    }
-
-    public List<Integer> getSelectedItems() {
-        List<Integer> items = new ArrayList<Integer>(selectedItems.size());
-        for (int i = 0; i < selectedItems.size(); i++) {
-            items.add(selectedItems.keyAt(i));
-        }
-        return items;
-    }
-
-    public static interface OnItemClickListener<T> {
-        public void onItemClick(View view, T item, boolean isLongClick);
+    public interface OnItemClickListener<T> {
+        void onItemClick(View view, T item, boolean isLongClick);
     }
 
     public void setOnItemClickListener(final OnItemClickListener<T> onItemClickListener) {
-        this.onItemClickListener = onItemClickListener;
+        this.mOnItemClickListener = onItemClickListener;
     }
 
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener{
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -106,8 +76,8 @@ public class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseRecyclerAda
         }
 
         private boolean handleClick(View v, boolean isLongClick) {
-            if (onItemClickListener != null) {
-                onItemClickListener.onItemClick(v, items.get(getAdapterPosition()), isLongClick);
+            if (mOnItemClickListener != null) {
+                mOnItemClickListener.onItemClick(v, mItems.get(getAdapterPosition()), isLongClick);
                 return true;
             }
             return false;

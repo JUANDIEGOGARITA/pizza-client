@@ -79,7 +79,7 @@ public class AddToppingFragment extends TransitionUtil.BaseFragment {
         View rootView = inflater.inflate(R.layout.fragment_add_topping, container, false);
         MainActivity.of(getActivity()).setToolbarTitleText("Add a New Topping");
 
-        toppingNameList = getActivity().getIntent().getStringArrayListExtra("topping_name_list");
+        toppingNameList = getActivity().getIntent().getStringArrayListExtra(getString(R.string.product_name_list));
 
         ButterKnife.bind(this, rootView);
         initBodyText();
@@ -132,7 +132,7 @@ public class AddToppingFragment extends TransitionUtil.BaseFragment {
                     if (Integer.parseInt(status.toString()) == AppContants.OK_HTTP_RESPONSE) {
                         MainActivity.of(getActivity()).goBack();
                     } else {
-                        showErrorDialog(status.toString() + " Internal Server Error");
+                        showErrorDialog(status.toString() + " " + getString(R.string.internal_server_error));
                     }
                 }
 
@@ -217,7 +217,7 @@ public class AddToppingFragment extends TransitionUtil.BaseFragment {
                 viewRoot.setVisibility(View.INVISIBLE);
             }
         });
-        //anim.setInterpolator(new AccelerateInterpolator());
+        anim.setInterpolator(new AccelerateInterpolator());
         anim.setDuration(Navigator.ANIM_DURATION);
         anim.start();
 
@@ -240,10 +240,7 @@ public class AddToppingFragment extends TransitionUtil.BaseFragment {
     public void networkChangedState(boolean isInternetAvailable) {
         if (isInternetAvailable) {
             MainActivity.of(getActivity()).getFabButton().setEnabled(true);
-            // TODO ANIMATE THIS PART, REPLACE ANIMATION
-            //  animateRevealShow(main_view);
         } else {
-            //   showEmptyOrErrorView("No internet connection available");
             MainActivity.of(getActivity()).getFabButton().setEnabled(false);
             if (!MainActivity.of(getActivity()).getSnackBar().isShown()) {
                 MainActivity.of(getActivity()).getSnackBar().show();
