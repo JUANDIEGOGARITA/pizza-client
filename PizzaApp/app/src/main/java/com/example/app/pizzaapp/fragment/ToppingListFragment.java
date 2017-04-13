@@ -210,11 +210,11 @@ public class ToppingListFragment extends TransitionUtil.BaseFragment implements 
                         } else {
                             mEmptyView.setVisibility(View.GONE);
                             ArrayList<Topping> responseList = mToppingList;
-                            ArrayList<Topping> listToDisplay = getFilteredByPizzaId(mPizzaId, responseList);
-                            if (listToDisplay.isEmpty()) {
+                            mToppingList = getFilteredByPizzaId(mPizzaId, responseList);
+                            if (mToppingList.isEmpty()) {
                                 showEmptyView("No more toppings available \n Add a new one here");
                             } else {
-                                mRecyclerAdapter.updateList(listToDisplay);
+                                mRecyclerAdapter.updateList(mToppingList);
                             }
                         }
 
