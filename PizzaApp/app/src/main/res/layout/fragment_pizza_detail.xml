@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/detail_layout"
+    android:id="@+id/main_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginBottom="1dp"
@@ -17,7 +17,7 @@
         android:background="#2e2e2e">
 
         <LinearLayout
-            android:id="@+id/pizza_details"
+            android:id="@+id/description_wrapper"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="#2e2e2e"
@@ -25,7 +25,7 @@
             android:padding="20dp">
 
             <android.support.v7.widget.AppCompatTextView
-                android:id="@+id/detail_title"
+                android:id="@+id/description_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@android:color/white"
@@ -34,7 +34,7 @@
                 android:textStyle="bold"/>
 
             <TextView
-                android:id="@+id/detail_body"
+                android:id="@+id/description_body"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-light"
@@ -45,11 +45,11 @@
         </LinearLayout>
 
 
-        <com.example.app.pizzaapp.view.CustonSwipeRefreshLayout
-            android:id="@+id/refresh_layout"
+        <com.example.app.pizzaapp.view.CustomSwipeRefreshLayout
+            android:id="@+id/refresh_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@+id/pizza_details">
+            android:layout_below="@+id/description_wrapper">
 
             <FrameLayout
                 android:layout_width="match_parent"
@@ -57,7 +57,7 @@
                 android:layout_height="match_parent">
 
                 <android.support.v7.widget.RecyclerView
-                    android:id="@+id/recycler"
+                    android:id="@+id/recycler_view"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="@color/almostWhite"
@@ -131,7 +131,7 @@
             </FrameLayout>
 
 
-        </com.example.app.pizzaapp.view.CustonSwipeRefreshLayout>
+        </com.example.app.pizzaapp.view.CustomSwipeRefreshLayout>
 
     </RelativeLayout>
 

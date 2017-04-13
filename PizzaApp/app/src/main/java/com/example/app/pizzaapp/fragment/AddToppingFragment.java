@@ -1,9 +1,5 @@
 package com.example.app.pizzaapp.fragment;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ArgbEvaluator;
-import android.animation.ValueAnimator;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
@@ -13,9 +9,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -31,6 +25,7 @@ import com.example.app.pizzaapp.util.AppContants;
 import com.example.app.pizzaapp.util.DialogUtil;
 import com.example.app.pizzaapp.util.DialogUtilListener;
 import com.example.app.pizzaapp.util.EditTextValidator;
+import com.example.app.pizzaapp.util.Initializer;
 import com.example.app.pizzaapp.util.Navigator;
 import com.example.app.pizzaapp.util.TransitionUtil;
 
@@ -43,21 +38,21 @@ import butterknife.ButterKnife;
  * Created by juandiegoGL on 4/9/17.
  */
 
-public class AddToppingFragment extends TransitionUtil.BaseFragment {
+public class AddToppingFragment extends TransitionUtil.BaseFragment implements Initializer {
 
-    @Bind(R.id.overlay)
-    LinearLayout overlayLayout;
+    @Bind(R.id.main_view)
+    LinearLayout mMainView;
 
     @Bind(R.id.title)
-    AppCompatTextView textView;
+    AppCompatTextView mTitle;
 
-    @Bind(R.id.topping)
-    EditText mTopping;
+    @Bind(R.id.name_edit_text)
+    EditText mNameEditText;
 
-    @Bind(R.id.time_wrapper)
-    TextInputLayout mTimeWrapper;
+    @Bind(R.id.name_edit_text_wrapper)
+    TextInputLayout mNameEditTextWrapper;
 
-    List<String> toppingNameList;
+    List<String> mToppingNameList;
 
     DialogUtilListener mDialogListener = new DialogUtilListener() {
         @Override
@@ -77,43 +72,17 @@ public class AddToppingFragment extends TransitionUtil.BaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_add_topping, container, false);
-        MainActivity.of(getActivity()).setToolbarTitleText("Add a New Topping");
-
-        toppingNameList = getActivity().getIntent().getStringArrayListExtra(getString(R.string.product_name_list));
-
         ButterKnife.bind(this, rootView);
-        initBodyText();
-        MainActivity.of(getActivity()).getFabButton().setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                postTopping();
-            }
-        });
-        mTopping.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                validateEditTexts();
-            }
-        });
+        init();
         return rootView;
     }
 
     private void initBodyText() {
-        textView.setAlpha(0);
-        textView.setTranslationY(100);
+        mTitle.setAlpha(0);
+        mTitle.setTranslationY(100);
         new Handler().postDelayed(new Runnable() {
             public void run() {
-                textView.animate()
+                mTitle.animate()
                         .alpha(1)
                         .setStartDelay(Navigator.ANIM_DURATION / 3)
                         .setDuration(Navigator.ANIM_DURATION * 5)
@@ -126,7 +95,7 @@ public class AddToppingFragment extends TransitionUtil.BaseFragment {
 
     public void postTopping() {
         if (isInternetAvailable() && validateEditTexts()) {
-            new DataManager(getActivity()).postTopping(new PostTopping(new Topping(mTopping.getText().toString())), new ServiceCallback() {
+            new DataManager(getActivity()).postTopping(new PostTopping(new Topping(mNameEditText.getText().toString())), new ServiceCallback() {
                 @Override
                 public void onSuccess(Object status, Object response) {
                     if (Integer.parseInt(status.toString()) == AppContants.OK_HTTP_RESPONSE) {
@@ -150,7 +119,7 @@ public class AddToppingFragment extends TransitionUtil.BaseFragment {
     }
 
     private boolean validateEditTexts() {
-        if (EditTextValidator.validateEditText(toppingNameList, mTimeWrapper, mTopping)) {
+        if (EditTextValidator.validateEditText(mToppingNameList, mNameEditTextWrapper, mNameEditText)) {
             return true;
         } else {
             return false;
@@ -163,7 +132,7 @@ public class AddToppingFragment extends TransitionUtil.BaseFragment {
 
     @Override
     public void onBeforeEnter(View contentView) {
-        overlayLayout.setVisibility(View.INVISIBLE);
+        mMainView.setVisibility(View.INVISIBLE);
         MainActivity.of(getActivity()).getFabButton().setImageResource(R.mipmap.ic_check);
         MainActivity.of(getActivity()).getToolbarButton().setVisibility(View.VISIBLE);
         MainActivity.of(getActivity()).setHomeIcon(MaterialMenuDrawable.IconState.BURGER);
@@ -172,14 +141,13 @@ public class AddToppingFragment extends TransitionUtil.BaseFragment {
 
     @Override
     public void onAfterEnter() {
-        animateRevealShow(overlayLayout);
+        TransitionUtil.animateRevealShow(getActivity(), mMainView);
     }
 
     @Override
     public boolean onBeforeBack() {
         MainActivity.of(getActivity()).animateHomeIcon(MaterialMenuDrawable.IconState.ARROW);
-        animateRevealHide(overlayLayout);
-
+        TransitionUtil.animateRevealHide(getActivity(), mMainView);
         return false;
     }
 
@@ -187,53 +155,7 @@ public class AddToppingFragment extends TransitionUtil.BaseFragment {
     public void onBeforeViewShows(View contentView) {
         TransitionUtil.excludeEnterTarget(getActivity(), R.id.toolbar_container, true);
         TransitionUtil.excludeEnterTarget(getActivity(), R.id.full_screen, true);
-        TransitionUtil.excludeEnterTarget(getActivity(), R.id.overlay, true);
-    }
-
-    public void animateRevealShow(View viewRoot) {
-        View fab = MainActivity.of(getActivity()).getFabButton();
-        int cx = fab.getLeft() + (fab.getWidth() / 2); //middle of button
-        int cy = fab.getTop() + (fab.getHeight() / 2); //middle of button
-        int radius = (int) Math.sqrt(Math.pow(cx, 2) + Math.pow(cy, 2)); //hypotenuse to top left
-
-        Animator anim = ViewAnimationUtils.createCircularReveal(viewRoot, cx, cy, 0, radius);
-        viewRoot.setVisibility(View.VISIBLE);
-        anim.setInterpolator(new DecelerateInterpolator());
-        anim.setDuration(Navigator.ANIM_DURATION);
-        anim.start();
-    }
-
-    public void animateRevealHide(final View viewRoot) {
-        View fab = MainActivity.of(getActivity()).getFabButton();
-        int cx = fab.getLeft() + (fab.getWidth() / 2); //middle of button
-        int cy = fab.getTop() + (fab.getHeight() / 2); //middle of button
-        int radius = (int) Math.sqrt(Math.pow(cx, 2) + Math.pow(cy, 2)); //hypotenuse to top left
-
-        Animator anim = ViewAnimationUtils.createCircularReveal(viewRoot, cx, cy, radius, 0);
-        anim.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-                viewRoot.setVisibility(View.INVISIBLE);
-            }
-        });
-        anim.setInterpolator(new AccelerateInterpolator());
-        anim.setDuration(Navigator.ANIM_DURATION);
-        anim.start();
-
-        Integer colorTo = getResources().getColor(R.color.colorPrimary);
-        Integer colorFrom = getResources().getColor(android.R.color.white);
-        ValueAnimator colorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
-        colorAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animator) {
-                overlayLayout.setBackgroundColor((Integer) animator.getAnimatedValue());
-            }
-
-        });
-        colorAnimation.setInterpolator(new AccelerateInterpolator(2));
-        colorAnimation.setDuration(Navigator.ANIM_DURATION);
-        colorAnimation.start();
+        TransitionUtil.excludeEnterTarget(getActivity(), R.id.main_view, true);
     }
 
     @Override
@@ -248,4 +170,42 @@ public class AddToppingFragment extends TransitionUtil.BaseFragment {
         }
     }
 
+    @Override
+    public void init() {
+        initBackendComponents();
+        initFrontendComponents();
+    }
+
+    @Override
+    public void initFrontendComponents() {
+        initBodyText();
+        MainActivity.of(getActivity()).setToolbarTitleText("Add a New Topping");
+        MainActivity.of(getActivity()).getFabButton().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                postTopping();
+            }
+        });
+        mNameEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                validateEditTexts();
+            }
+        });
+    }
+
+    @Override
+    public void initBackendComponents() {
+        mToppingNameList = getActivity().getIntent().getStringArrayListExtra(getString(R.string.product_name_list));
+    }
 }

@@ -28,6 +28,7 @@ import com.example.app.pizzaapp.model.Topping;
 import com.example.app.pizzaapp.util.AppContants;
 import com.example.app.pizzaapp.util.DialogUtil;
 import com.example.app.pizzaapp.util.DialogUtilListener;
+import com.example.app.pizzaapp.util.Initializer;
 import com.example.app.pizzaapp.util.Navigator;
 import com.example.app.pizzaapp.util.TransitionUtil;
 
@@ -41,16 +42,16 @@ import butterknife.ButterKnife;
  * Created by juandiegoGL on 4/6/17.
  */
 
-public class ToppingListFragment extends TransitionUtil.BaseFragment implements SearchView.OnQueryTextListener {
+public class ToppingListFragment extends TransitionUtil.BaseFragment implements SearchView.OnQueryTextListener, Initializer {
 
-    @Bind(R.id.recycler)
-    RecyclerView recyclerView;
+    @Bind(R.id.recycler_view)
+    RecyclerView mRecyclerView;
 
-    @Bind(R.id.refresh_layout)
-    SwipeRefreshLayout mRefreshLayout;
+    @Bind(R.id.refresh_view)
+    SwipeRefreshLayout mRefreshView;
 
     @Bind(R.id.main_view)
-    RelativeLayout main_view;
+    RelativeLayout mMainView;
 
     @Bind(R.id.empty_view)
     RelativeLayout mEmptyView;
@@ -62,34 +63,32 @@ public class ToppingListFragment extends TransitionUtil.BaseFragment implements 
     RelativeLayout mErrorView;
 
     @Bind(R.id.error_message)
-    TextView error_message;
-    ToppingRecyclerAdapter recyclerAdapter;
+    TextView mErrorMessage;
 
-    List<Integer> toppingIdList, toppingIdListByPizza;
+    ToppingRecyclerAdapter mRecyclerAdapter;
+
+    List<Integer> mToppingIdList, mToppingIdListByPizza;
     ArrayList<Topping> mToppingList;
 
     boolean isCheckAvailable = false;
     int mPizzaId;
-
     boolean isLastOne = false;
-
-    String itemDescription;
 
     CheckListener mCheckListener = new CheckListener() {
         @Override
         public void onToppingChecked(int toppingId) {
-            if (!toppingIdList.contains(toppingId)) {
-                toppingIdList.add(toppingId);
+            if (!mToppingIdList.contains(toppingId)) {
+                mToppingIdList.add(toppingId);
             }
             validateFabButtonState();
         }
 
         @Override
         public void onToppingUnChecked(int toppingId) {
-            if (toppingIdList.contains(toppingId)) {
-                for (int i = 0; i < toppingIdList.size(); i++) {
-                    if (toppingIdList.get(i) == toppingId) ;
-                    toppingIdList.remove(i);
+            if (mToppingIdList.contains(toppingId)) {
+                for (int i = 0; i < mToppingIdList.size(); i++) {
+                    if (mToppingIdList.get(i) == toppingId) ;
+                    mToppingIdList.remove(i);
                 }
             }
             validateFabButtonState();
@@ -115,37 +114,18 @@ public class ToppingListFragment extends TransitionUtil.BaseFragment implements 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_topping_list, container, false);
         ButterKnife.bind(this, rootView);
-        toppingIdList = new ArrayList<>();
-        itemDescription = getActivity().getIntent().getStringExtra("item_text");
-        mPizzaId = getActivity().getIntent().getIntExtra("pizzaId", -1);
-        toppingIdListByPizza = getActivity().getIntent().getIntegerArrayListExtra("toppingIds");
-
-        if (mPizzaId != -1) {
-            isCheckAvailable = true;
-        }
-
-        ((MainActivity) getActivity()).getToolbarTitle().setText(itemDescription);
-        mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                loadToppings();
-            }
-        });
-
-        initRecyclerView();
-        initSearchView();
-        initBodyText();
+        init();
         return rootView;
     }
 
     private void initBodyText() {
-        recyclerView.setAlpha(0);
-        recyclerView.setTranslationY(100);
+        mRecyclerView.setAlpha(0);
+        mRecyclerView.setTranslationY(100);
         MainActivity.of(getActivity()).getFabButton().setAlpha(0.f);
         MainActivity.of(getActivity()).getFabButton().setTranslationY(100);
         new Handler().postDelayed(new Runnable() {
             public void run() {
-                recyclerView.animate()
+                mRecyclerView.animate()
                         .alpha(1)
                         .setStartDelay(Navigator.ANIM_DURATION / 3)
                         .setDuration(Navigator.ANIM_DURATION * 5)
@@ -165,12 +145,12 @@ public class ToppingListFragment extends TransitionUtil.BaseFragment implements 
 
     private void initRecyclerView() {
         if (isCheckAvailable) {
-            recyclerAdapter = new ToppingRecyclerAdapter(mCheckListener, isCheckAvailable);
+            mRecyclerAdapter = new ToppingRecyclerAdapter(mCheckListener, isCheckAvailable);
         } else {
-            recyclerAdapter = new ToppingRecyclerAdapter();
+            mRecyclerAdapter = new ToppingRecyclerAdapter();
         }
 
-        recyclerAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener<Topping>() {
+        mRecyclerAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener<Topping>() {
             @Override
             public void onItemClick(View view, Topping item, boolean isLongClick) {
                 if (isLongClick) {
@@ -179,8 +159,8 @@ public class ToppingListFragment extends TransitionUtil.BaseFragment implements 
             }
         });
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        recyclerView.setAdapter(recyclerAdapter);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mRecyclerView.setAdapter(mRecyclerAdapter);
 
         if (isCheckAvailable) {
             validateFabButtonState();
@@ -190,7 +170,7 @@ public class ToppingListFragment extends TransitionUtil.BaseFragment implements 
             public void onClick(View v) {
                 MainActivity.of(getActivity()).getSearchView().onActionViewCollapsed();
                 ((MainActivity) getActivity()).getToolbarTitle().setVisibility(View.VISIBLE);
-                if (!toppingIdList.isEmpty()) {
+                if (!mToppingIdList.isEmpty()) {
                     postToppingsByPizza();
                 } else {
                     Navigator.launchAddProductFragment(MainActivity.of(getActivity()),
@@ -212,15 +192,15 @@ public class ToppingListFragment extends TransitionUtil.BaseFragment implements 
 
     private void loadToppings() {
         if (isInternetAvailable()) {
-            mRefreshLayout.setRefreshing(true);
+            mRefreshView.setRefreshing(true);
             new DataManager(getActivity()).getToppings(new ServiceCallback() {
                 @Override
                 public void onSuccess(Object status, Object response) {
-                    if (mRefreshLayout.isRefreshing()) {
-                        mRefreshLayout.setRefreshing(false);
+                    if (mRefreshView.isRefreshing()) {
+                        mRefreshView.setRefreshing(false);
                     }
                     mErrorView.setVisibility(View.GONE);
-                    recyclerView.setVisibility(View.VISIBLE);
+                    mRecyclerView.setVisibility(View.VISIBLE);
 
                     if (Integer.parseInt(status.toString()) == AppContants.OK_HTTP_RESPONSE) {
                         mToppingList = (ArrayList<Topping>) response;
@@ -234,7 +214,7 @@ public class ToppingListFragment extends TransitionUtil.BaseFragment implements 
                             if (listToDisplay.isEmpty()) {
                                 showEmptyView("No more toppings available \n Add a new one here");
                             } else {
-                                recyclerAdapter.updateList(listToDisplay);
+                                mRecyclerAdapter.updateList(listToDisplay);
                             }
                         }
 
@@ -256,36 +236,6 @@ public class ToppingListFragment extends TransitionUtil.BaseFragment implements 
         } else {
             networkChangedState(false);
         }
-
-
-        new DataManager(getActivity()).getToppings(new ServiceCallback() {
-            @Override
-            public void onSuccess(Object status, Object response) {
-                if (mRefreshLayout.isRefreshing()) {
-                    mRefreshLayout.setRefreshing(false);
-                }
-
-                ArrayList<Topping> responseList = (ArrayList<Topping>) response;
-
-
-                ArrayList<Topping> listToDisplay = getFilteredByPizzaId(mPizzaId, responseList);
-                if (listToDisplay.isEmpty()) {
-                    //TODO IF TOPPINGLIST IS EMPTY DISPLAY MESSAGE
-                } else {
-                    recyclerAdapter.updateList(listToDisplay);
-                }
-            }
-
-            @Override
-            public void onError(Object networkError) {
-
-            }
-
-            @Override
-            public void onPreExecute() {
-
-            }
-        });
     }
 
     private ArrayList<Topping> getFilteredByPizzaId(int pizzaId, ArrayList<Topping> responseList) {
@@ -295,7 +245,7 @@ public class ToppingListFragment extends TransitionUtil.BaseFragment implements 
             ArrayList<Topping> responseListFiltered = new ArrayList<>();
             for (int i = 0; i < responseList.size(); i++) {
                 Topping currentTopping = responseList.get(i);
-                if (!toppingIdListByPizza.contains(Integer.parseInt(currentTopping.getId()))) {
+                if (!mToppingIdListByPizza.contains(Integer.parseInt(currentTopping.getId()))) {
                     responseListFiltered.add(currentTopping);
                 }
             }
@@ -307,11 +257,11 @@ public class ToppingListFragment extends TransitionUtil.BaseFragment implements 
 
         DataManager dataManager = new DataManager(getActivity());
 
-        for (int i = 0; i < toppingIdList.size(); i++) {
-            if (i == toppingIdList.size() - 1) {
+        for (int i = 0; i < mToppingIdList.size(); i++) {
+            if (i == mToppingIdList.size() - 1) {
                 isLastOne = true;
             }
-            dataManager.postToppingByPizza(mPizzaId, new PostToppingByPizza(toppingIdList.get(i)), new ServiceCallback() {
+            dataManager.postToppingByPizza(mPizzaId, new PostToppingByPizza(mToppingIdList.get(i)), new ServiceCallback() {
                 @Override
                 public void onSuccess(Object status, Object response) {
                     if (Integer.parseInt(status.toString()) == AppContants.OK_HTTP_RESPONSE) {
@@ -339,7 +289,7 @@ public class ToppingListFragment extends TransitionUtil.BaseFragment implements 
     @Override
     public void onBeforeViewShows(View contentView) {
         ViewCompat.setTransitionName(((MainActivity) getActivity()).getToolbarTitle(), getString(R.string.title_element));
-        ViewCompat.setTransitionName(main_view, "option_wrapper");
+        ViewCompat.setTransitionName(mMainView, "option_wrapper");
 
         TransitionUtil.excludeEnterTarget(getActivity(), R.id.toolbar_container, true);
         TransitionUtil.excludeEnterTarget(getActivity(), R.id.full_screen, true);
@@ -348,7 +298,7 @@ public class ToppingListFragment extends TransitionUtil.BaseFragment implements 
     @Override
     public boolean onBeforeBack() {
         MainActivity.of(getActivity()).animateHomeIcon(MaterialMenuDrawable.IconState.ARROW);
-        TransitionUtil.fadeThenFinish(recyclerView, getActivity());
+        TransitionUtil.fadeThenFinish(mRecyclerView, getActivity());
         TransitionUtil.fadeThenFinish(MainActivity.of(getActivity()).getFabButton(), getActivity());
         return false;
     }
@@ -369,14 +319,14 @@ public class ToppingListFragment extends TransitionUtil.BaseFragment implements 
     }
 
     public void showErrorView(String message) {
-        recyclerView.setVisibility(View.GONE);
+        mRecyclerView.setVisibility(View.GONE);
         mErrorView.setVisibility(View.VISIBLE);
-        error_message.setText(message);
+        mErrorMessage.setText(message);
     }
 
     private void showEmptyView(String title) {
         mEmptyView.setVisibility(View.VISIBLE);
-        recyclerView.setVisibility(View.GONE);
+        mRecyclerView.setVisibility(View.GONE);
         if (title != null) {
             mEmptyTile.setText(title);
         }
@@ -388,12 +338,12 @@ public class ToppingListFragment extends TransitionUtil.BaseFragment implements 
 
 
     private void validateFabButtonState() {
-        if (toppingIdList.isEmpty()) {
-            mRefreshLayout.setEnabled(true);
+        if (mToppingIdList.isEmpty()) {
+            mRefreshView.setEnabled(true);
             MainActivity.of(getActivity()).getFabButton().setImageResource(R.mipmap.ic_add);
 
         } else {
-            mRefreshLayout.setEnabled(false);
+            mRefreshView.setEnabled(false);
             MainActivity.of(getActivity()).getFabButton().setImageResource(R.mipmap.ic_check);
         }
     }
@@ -427,7 +377,7 @@ public class ToppingListFragment extends TransitionUtil.BaseFragment implements 
             @Override
             public boolean onClose() {
                 MainActivity.of(getActivity()).getToolbarTitle().setVisibility(View.VISIBLE);
-                recyclerAdapter.updateList(mToppingList);
+                mRecyclerAdapter.updateList(mToppingList);
                 return false;
             }
         });
@@ -436,7 +386,7 @@ public class ToppingListFragment extends TransitionUtil.BaseFragment implements 
     @Override
     public boolean onQueryTextChange(String query) {
         if (!mToppingList.isEmpty()) {
-            recyclerAdapter.updateList(filter(query));
+            mRecyclerAdapter.updateList(filter(query));
         }
         return true;
     }
@@ -456,5 +406,35 @@ public class ToppingListFragment extends TransitionUtil.BaseFragment implements 
             }
         }
         return filteredModelList;
+    }
+
+    @Override
+    public void init() {
+        initBackendComponents();
+        initFrontendComponents();
+    }
+
+    @Override
+    public void initFrontendComponents() {
+        mRefreshView.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                loadToppings();
+            }
+        });
+        initRecyclerView();
+        initSearchView();
+        initBodyText();
+    }
+
+    @Override
+    public void initBackendComponents() {
+        mToppingIdList = new ArrayList<>();
+        mPizzaId = getActivity().getIntent().getIntExtra("pizzaId", -1);
+        mToppingIdListByPizza = getActivity().getIntent().getIntegerArrayListExtra("toppingIds");
+        ((MainActivity) getActivity()).getToolbarTitle().setText(getActivity().getIntent().getStringExtra("item_text"));
+        if (mPizzaId != -1) {
+            isCheckAvailable = true;
+        }
     }
 }

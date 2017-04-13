@@ -14,7 +14,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SearchView;
 import android.widget.TextView;
@@ -28,6 +27,7 @@ import com.example.app.pizzaapp.datamanager.ServiceCallback;
 import com.example.app.pizzaapp.model.GetToppingByPizzaResult;
 import com.example.app.pizzaapp.model.Topping;
 import com.example.app.pizzaapp.util.AppContants;
+import com.example.app.pizzaapp.util.Initializer;
 import com.example.app.pizzaapp.util.Navigator;
 import com.example.app.pizzaapp.util.TransitionUtil;
 
@@ -41,45 +41,37 @@ import butterknife.ButterKnife;
  * Created by juandiegoGL on 4/6/17.
  */
 
-public class PizzaDetailFragment extends TransitionUtil.BaseFragment implements SearchView.OnQueryTextListener {
+public class PizzaDetailFragment extends TransitionUtil.BaseFragment implements SearchView.OnQueryTextListener, Initializer {
 
-    @Bind(R.id.detail_title)
-    AppCompatTextView titleTextView;
+    @Bind(R.id.description_title)
+    AppCompatTextView mDescriptionTitle;
 
-    @Bind(R.id.detail_body)
-    TextView detailBodyTextView;
+    @Bind(R.id.description_body)
+    TextView mDescriptionBody;
 
-    @Bind(R.id.recycler)
-    RecyclerView recyclerView;
+    @Bind(R.id.recycler_view)
+    RecyclerView mRecyclerView;
 
-    @Bind(R.id.refresh_layout)
-    SwipeRefreshLayout mRefreshLayout;
+    @Bind(R.id.refresh_view)
+    SwipeRefreshLayout mRefreshView;
 
-    @Bind(R.id.pizza_details)
-    LinearLayout pizza_details;
-
-    @Bind(R.id.detail_layout)
-    CardView detail_layout;
+    @Bind(R.id.main_view)
+    CardView mMainView;
 
     @Bind(R.id.error_view)
     RelativeLayout mErrorView;
 
     @Bind(R.id.error_message)
-    TextView error_message;
+    TextView mErrorMessage;
 
     @Bind(R.id.empty_view)
     RelativeLayout mEmptyView;
 
-    ToppingRecyclerAdapter recyclerAdapter;
-    ArrayList<String> list;
+    ToppingRecyclerAdapter mRecyclerAdapter;
 
-    ArrayList<Integer> listIds;
-    List<Topping> toppingList;
-    int pizzaId;
-
-    public static PizzaDetailFragment create() {
-        return new PizzaDetailFragment();
-    }
+    ArrayList<Integer> mToppingIdList;
+    List<Topping> mToppingList;
+    int mPizzaId;
 
     public PizzaDetailFragment() {
     }
@@ -88,42 +80,8 @@ public class PizzaDetailFragment extends TransitionUtil.BaseFragment implements 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_pizza_detail, container, false);
         ButterKnife.bind(this, rootView);
-        MainActivity activity = MainActivity.of(getActivity());
-        toppingList = new ArrayList<>();
-        activity.getToolbarButton().setVisibility(View.VISIBLE);
-        String itemText = getActivity().getIntent().getStringExtra("item_text");
-        String itemDescription = getActivity().getIntent().getStringExtra("item_description");
-        list = getActivity().getIntent().getStringArrayListExtra("list");
-        pizzaId = Integer.parseInt(getActivity().getIntent().getStringExtra("pizza_id"));
-        ((MainActivity) getActivity()).getToolbarTitle().setText(itemText);
-        detailBodyTextView.setText(itemDescription);
-        initRecyclerView();
-        mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                loadToppingsByPizza();
-            }
-        });
-        initDetailBody();
-        initSearchView();
-        initBodyText();
+        init();
         return rootView;
-    }
-
-    private void initBodyText() {
-        recyclerView.setAlpha(0);
-        recyclerView.setTranslationY(100);
-        new Handler().postDelayed(new Runnable() {
-            public void run() {
-                recyclerView.animate()
-                        .alpha(1)
-                        .setStartDelay(Navigator.ANIM_DURATION / 3)
-                        .setDuration(Navigator.ANIM_DURATION * 5)
-                        .setInterpolator(new DecelerateInterpolator(9))
-                        .translationY(0)
-                        .start();
-            }
-        }, 200);
     }
 
     @Override
@@ -134,29 +92,29 @@ public class PizzaDetailFragment extends TransitionUtil.BaseFragment implements 
 
 
     private void loadToppingsByPizza() {
-        mRefreshLayout.setRefreshing(true);
-        new DataManager(getActivity()).getToppingsByPizzaId(pizzaId, new ServiceCallback() {
+        mRefreshView.setRefreshing(true);
+        new DataManager(getActivity()).getToppingsByPizzaId(mPizzaId, new ServiceCallback() {
             @Override
             public void onSuccess(Object status, Object response) {
-                if (mRefreshLayout.isRefreshing()) {
-                    mRefreshLayout.setRefreshing(false);
+                if (mRefreshView.isRefreshing()) {
+                    mRefreshView.setRefreshing(false);
                 }
-                toppingList = new ArrayList<>();
+                mToppingList = new ArrayList<>();
                 mErrorView.setVisibility(View.GONE);
-                recyclerView.setVisibility(View.VISIBLE);
+                mRecyclerView.setVisibility(View.VISIBLE);
 
                 if (Integer.parseInt(status.toString()) == AppContants.OK_HTTP_RESPONSE) {
-                    listIds = new ArrayList<>();
+                    mToppingIdList = new ArrayList<>();
                     ArrayList<GetToppingByPizzaResult> getToppingByPizzaResultList = (ArrayList<GetToppingByPizzaResult>) response;
                     for (GetToppingByPizzaResult model : getToppingByPizzaResultList) {
-                        toppingList.add(new Topping(model.getId(), model.getName()));
-                        listIds.add(model.getToppingId());
+                        mToppingList.add(new Topping(model.getId(), model.getName()));
+                        mToppingIdList.add(model.getToppingId());
                     }
-                    if (toppingList.isEmpty()) {
+                    if (mToppingList.isEmpty()) {
                         showEmptyView();
                     } else {
                         mEmptyView.setVisibility(View.GONE);
-                        recyclerAdapter.updateList(toppingList);
+                        mRecyclerAdapter.updateList(mToppingList);
                     }
                 } else {
                     showErrorView(status.toString() + " " + getString(R.string.internal_server_error));
@@ -176,35 +134,43 @@ public class PizzaDetailFragment extends TransitionUtil.BaseFragment implements 
     }
 
     private void initRecyclerView() {
-        recyclerAdapter = new ToppingRecyclerAdapter();
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        recyclerView.setAdapter(recyclerAdapter);
+        mRecyclerAdapter = new ToppingRecyclerAdapter();
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mRecyclerView.setAdapter(mRecyclerAdapter);
 
         MainActivity.of(getActivity()).getFabButton().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Navigator.launchToppingList(MainActivity.of(getActivity()), "Add toppings to your Pizza",
-                        v, R.layout.fragment_topping_list, pizzaId, listIds);
+                        v, R.layout.fragment_topping_list, mPizzaId, mToppingIdList);
             }
         });
     }
 
-    private void initDetailBody() {
-        detailBodyTextView.setAlpha(0);
-        recyclerView.setAlpha(0);
-        titleTextView.setAlpha(0);
+    private void initBodyText() {
+        mDescriptionBody.setAlpha(0);
+        mDescriptionTitle.setAlpha(0);
+        mRecyclerView.setAlpha(0);
+        mRecyclerView.setTranslationY(100);
         new Handler().postDelayed(new Runnable() {
             public void run() {
-                detailBodyTextView.animate().alpha(1).start();
-                recyclerView.animate().alpha(1).start();
-                titleTextView.animate().alpha(1).start();
+                mRecyclerView.animate()
+                        .alpha(1)
+                        .setStartDelay(Navigator.ANIM_DURATION / 3)
+                        .setDuration(Navigator.ANIM_DURATION * 5)
+                        .setInterpolator(new DecelerateInterpolator(9))
+                        .translationY(0)
+                        .start();
+                mDescriptionBody.animate().alpha(1).start();
+                mDescriptionTitle.animate().alpha(1).start();
             }
-        }, 500);
+        }, 200);
     }
+
 
     @Override
     public void onBeforeViewShows(View contentView) {
-        ViewCompat.setTransitionName(detail_layout, "detail_element");
+        ViewCompat.setTransitionName(mMainView, "detail_element");
         ViewCompat.setTransitionName(MainActivity.of(getActivity()).getFabButton(), "fab");
         ViewCompat.setTransitionName(((MainActivity) getActivity()).getToolbarTitle(), "detail_title");
 
@@ -223,8 +189,8 @@ public class PizzaDetailFragment extends TransitionUtil.BaseFragment implements 
     public boolean onBeforeBack() {
         MainActivity.of(getActivity()).animateHomeIcon(MaterialMenuDrawable.IconState.ARROW);
         MainActivity.of(getActivity()).getFragmentBackground().animate().scaleX(1).scaleY(1).alpha(1).translationY(0).setDuration(Navigator.ANIM_DURATION / 4).setInterpolator(new DecelerateInterpolator()).start();
-        TransitionUtil.fadeThenFinish(detailBodyTextView, getActivity());
-        TransitionUtil.fadeThenFinish(titleTextView, getActivity());
+        TransitionUtil.fadeThenFinish(mDescriptionBody, getActivity());
+        TransitionUtil.fadeThenFinish(mDescriptionTitle, getActivity());
 
         return false;
     }
@@ -244,14 +210,14 @@ public class PizzaDetailFragment extends TransitionUtil.BaseFragment implements 
     }
 
     public void showErrorView(String message) {
-        recyclerView.setVisibility(View.GONE);
+        mRecyclerView.setVisibility(View.GONE);
         mErrorView.setVisibility(View.VISIBLE);
-        error_message.setText(message);
+        mErrorMessage.setText(message);
     }
 
     private void showEmptyView() {
         mEmptyView.setVisibility(View.VISIBLE);
-        recyclerView.setVisibility(View.GONE);
+        mRecyclerView.setVisibility(View.GONE);
     }
 
     private void initSearchView() {
@@ -269,7 +235,7 @@ public class PizzaDetailFragment extends TransitionUtil.BaseFragment implements 
             @Override
             public boolean onClose() {
                 MainActivity.of(getActivity()).getToolbarTitle().setVisibility(View.VISIBLE);
-                recyclerAdapter.updateList(toppingList);
+                mRecyclerAdapter.updateList(mToppingList);
                 return false;
             }
         });
@@ -277,7 +243,7 @@ public class PizzaDetailFragment extends TransitionUtil.BaseFragment implements 
 
     @Override
     public boolean onQueryTextChange(String query) {
-        recyclerAdapter.updateList(filter(query));
+        mRecyclerAdapter.updateList(filter(query));
         return true;
     }
 
@@ -289,7 +255,7 @@ public class PizzaDetailFragment extends TransitionUtil.BaseFragment implements 
     private List<Topping> filter(String query) {
         query = query.toLowerCase();
         final List<Topping> filteredModelList = new ArrayList<>();
-        for (Topping model : toppingList) {
+        for (Topping model : mToppingList) {
             final String text = model.getName().toLowerCase();
             if (text.contains(query)) {
                 filteredModelList.add(model);
@@ -298,4 +264,31 @@ public class PizzaDetailFragment extends TransitionUtil.BaseFragment implements 
         return filteredModelList;
     }
 
+    @Override
+    public void init() {
+        initBackendComponents();
+        initFrontendComponents();
+    }
+
+    @Override
+    public void initFrontendComponents() {
+        ((MainActivity) getActivity()).getToolbarTitle().setText(getActivity().getIntent().getStringExtra("item_text"));
+        mRefreshView.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                loadToppingsByPizza();
+            }
+        });
+        initRecyclerView();
+        initSearchView();
+        initBodyText();
+    }
+
+    @Override
+    public void initBackendComponents() {
+        mToppingList = new ArrayList<>();
+        mPizzaId = Integer.parseInt(getActivity().getIntent().getStringExtra("pizza_id"));
+        mDescriptionBody.setText(getActivity().getIntent().getStringExtra("item_description"));
+
+    }
 }

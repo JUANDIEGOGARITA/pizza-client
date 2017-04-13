@@ -1,6 +1,5 @@
 package com.example.app.pizzaapp.util;
 
-import android.app.Dialog;
 import android.content.DialogInterface;
 
 /**

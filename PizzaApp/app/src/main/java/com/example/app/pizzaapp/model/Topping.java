@@ -48,7 +48,6 @@ public class Topping extends Product implements Parcelable {
         this.mName = in.readString();
     }
 
-
     public static final Parcelable.Creator<Topping> CREATOR = new Parcelable.Creator<Topping>() {
         @Override
         public Topping createFromParcel(Parcel source) {
@@ -60,5 +59,4 @@ public class Topping extends Product implements Parcelable {
             return new Topping[size];
         }
     };
-
 }

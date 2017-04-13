@@ -14,17 +14,17 @@ import java.util.List;
 public class Error implements Parcelable {
 
     @SerializedName("pizza_topping")
-    List<String> errors;
+    List<String> mErrors;
 
 
     public List<String> getErrors() {
-        return errors;
+        return mErrors;
     }
 
     @Override
     public String toString() {
         return "Error{" +
-                "errors=" + errors +
+                "errors=" + mErrors +
                 '}';
     }
 
@@ -35,11 +35,11 @@ public class Error implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeStringList(this.errors);
+        parcel.writeStringList(this.mErrors);
     }
 
     public Error(Parcel in) {
-        in.readStringList(errors);
+        in.readStringList(mErrors);
     }
 
     public static final Parcelable.Creator<Error> CREATOR = new Parcelable.Creator<Error>() {

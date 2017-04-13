@@ -10,6 +10,7 @@ public abstract class Product {
 
     @SerializedName("id")
     String mId;
+
     @SerializedName("name")
     String mName;
 

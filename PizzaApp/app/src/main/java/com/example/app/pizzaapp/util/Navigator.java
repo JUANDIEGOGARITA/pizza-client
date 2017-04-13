@@ -116,7 +116,7 @@ public class Navigator {
             case R.layout.fragment_pizza_list:
                 return new PizzaListFragment();
             case R.layout.fragment_pizza_detail:
-                return PizzaDetailFragment.create();
+                return new PizzaDetailFragment();
             case R.layout.fragment_add_pizza:
                 return new AddPizzaFragment();
             case R.layout.fragment_topping_list:

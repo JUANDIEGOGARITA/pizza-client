@@ -1,6 +1,9 @@
 package com.example.app.pizzaapp.util;
 
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ArgbEvaluator;
+import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.os.Build;
 import android.os.Bundle;
@@ -11,9 +14,13 @@ import android.support.v4.util.Pair;
 import android.support.v7.app.ActionBarActivity;
 import android.transition.Transition;
 import android.view.View;
+import android.view.ViewAnimationUtils;
 import android.view.ViewTreeObserver;
 import android.view.Window;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 
+import com.example.app.pizzaapp.R;
 import com.example.app.pizzaapp.activity.MainActivity;
 import com.example.app.pizzaapp.receiver.NetworkStateChangeReceiver;
 
@@ -38,6 +45,52 @@ public class TransitionUtil {
         this.mActivity = activity;
         isAfterEnter = savedInstanceState != null;
         postponeEnterTransition();
+    }
+
+    public static void animateRevealShow(Activity activity, View viewRoot) {
+        View fab = MainActivity.of(activity).getFabButton();
+        int cx = fab.getLeft() + (fab.getWidth() / 2);
+        int cy = fab.getTop() + (fab.getHeight() / 2);
+        int radius = (int) Math.sqrt(Math.pow(cx, 2) + Math.pow(cy, 2));
+
+        Animator anim = ViewAnimationUtils.createCircularReveal(viewRoot, cx, cy, 0, radius);
+        viewRoot.setVisibility(View.VISIBLE);
+        anim.setInterpolator(new DecelerateInterpolator());
+        anim.setDuration(Navigator.ANIM_DURATION);
+        anim.start();
+    }
+
+    public static void animateRevealHide(Activity activity, final View viewRoot) {
+        View fab = MainActivity.of(activity).getFabButton();
+        int cx = fab.getLeft() + (fab.getWidth() / 2);
+        int cy = fab.getTop() + (fab.getHeight() / 2);
+        int radius = (int) Math.sqrt(Math.pow(cx, 2) + Math.pow(cy, 2));
+
+        Animator anim = ViewAnimationUtils.createCircularReveal(viewRoot, cx, cy, radius, 0);
+        anim.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                viewRoot.setVisibility(View.INVISIBLE);
+            }
+        });
+        anim.setInterpolator(new AccelerateInterpolator());
+        anim.setDuration(Navigator.ANIM_DURATION);
+        anim.start();
+
+        Integer colorTo = activity.getResources().getColor(R.color.colorPrimary);
+        Integer colorFrom = activity.getResources().getColor(android.R.color.white);
+        ValueAnimator colorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
+        colorAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animator) {
+                viewRoot.setBackgroundColor((Integer) animator.getAnimatedValue());
+            }
+
+        });
+        colorAnimation.setInterpolator(new AccelerateInterpolator(2));
+        colorAnimation.setDuration(Navigator.ANIM_DURATION);
+        colorAnimation.start();
     }
 
     public void onResume() {
@@ -140,7 +193,6 @@ public class TransitionUtil {
         ActivityCompat.postponeEnterTransition(mActivity);
         isPostponeEnterTransition = true;
     }
-
 
     private void startPostponedEnterTransition() {
         final View decor = mActivity.getWindow().getDecorView();
@@ -289,7 +341,6 @@ public class TransitionUtil {
         public void onCreate(Bundle savedInstanceState) {
             TransitionUtil.of(getActivity()).addListener(this);
             super.onCreate(savedInstanceState);
-
         }
 
         @Override

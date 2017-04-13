@@ -5,8 +5,8 @@
     android:layout_height="match_parent"
     android:background="@color/almostWhite">
 
-    <com.example.app.pizzaapp.view.CustonSwipeRefreshLayout
-        android:id="@+id/refresh_layout"
+    <com.example.app.pizzaapp.view.CustomSwipeRefreshLayout
+        android:id="@+id/refresh_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -16,7 +16,7 @@
             android:layout_height="match_parent">
 
             <android.support.v7.widget.RecyclerView
-                android:id="@+id/recycler"
+                android:id="@+id/recycler_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scrollbars="vertical" />
@@ -87,6 +87,6 @@
 
         </FrameLayout>
 
-    </com.example.app.pizzaapp.view.CustonSwipeRefreshLayout>
+    </com.example.app.pizzaapp.view.CustomSwipeRefreshLayout>
 
 </RelativeLayout>

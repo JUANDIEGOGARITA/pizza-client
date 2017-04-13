@@ -10,6 +10,7 @@ public class PostToppingByPizzaResult {
 
     @SerializedName("object")
     GetToppingByPizzaResult mTopping;
+
     @SerializedName("errors")
     Error mError;
 

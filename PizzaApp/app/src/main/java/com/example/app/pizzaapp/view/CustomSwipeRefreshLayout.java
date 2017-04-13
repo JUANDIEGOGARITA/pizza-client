@@ -8,20 +8,22 @@ import com.example.app.pizzaapp.R;
 
 
 /**
- * Created by joshujones on 9/2/16.
+ * Created by juandiegoGL on 4/6/17.
  */
-public class CustonSwipeRefreshLayout extends SwipeRefreshLayout {
-    public CustonSwipeRefreshLayout(Context context) {
+
+public class CustomSwipeRefreshLayout extends SwipeRefreshLayout {
+
+    public CustomSwipeRefreshLayout(Context context) {
         super(context);
         setup();
     }
 
-    public CustonSwipeRefreshLayout(Context context, AttributeSet attrs) {
+    public CustomSwipeRefreshLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         setup();
     }
 
-    private void setup(){
+    private void setup() {
         setColorSchemeResources(R.color.colorPrimary, R.color.colorPrimaryDark);
     }
 }

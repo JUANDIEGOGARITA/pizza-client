@@ -1,9 +1,5 @@
 package com.example.app.pizzaapp.fragment;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ArgbEvaluator;
-import android.animation.ValueAnimator;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,9 +10,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -50,17 +44,17 @@ public class AddPizzaFragment extends TransitionUtil.BaseFragment implements Ini
     @Bind(R.id.main_view)
     LinearLayout mMainView;
 
-    @Bind(R.id.add_pizza_title)
-    AppCompatTextView mAddPizzaTitle;
+    @Bind(R.id.title)
+    AppCompatTextView mTitle;
 
-    @Bind(R.id.pizza_name)
-    EditText mPizzaName;
+    @Bind(R.id.name_edit_text)
+    EditText mNameEditText;
 
-    @Bind(R.id.pizza_description)
-    EditText mPizzaDescription;
+    @Bind(R.id.description_edit_text)
+    EditText mDescriptionEditText;
 
-    @Bind(R.id.pizza_name_wrapper)
-    TextInputLayout pizzaNameWrapper;
+    @Bind(R.id.name_edit_text_wrapper)
+    TextInputLayout mNameEditTextWrapper;
 
     List<String> mPizzaNameList;
 
@@ -88,11 +82,11 @@ public class AddPizzaFragment extends TransitionUtil.BaseFragment implements Ini
     }
 
     private void initBodyText() {
-        mAddPizzaTitle.setAlpha(0);
-        mAddPizzaTitle.setTranslationY(100);
+        mTitle.setAlpha(0);
+        mTitle.setTranslationY(100);
         new Handler().postDelayed(new Runnable() {
             public void run() {
-                mAddPizzaTitle.animate()
+                mTitle.animate()
                         .alpha(1)
                         .setStartDelay(Navigator.ANIM_DURATION / 3)
                         .setDuration(Navigator.ANIM_DURATION * 5)
@@ -104,7 +98,7 @@ public class AddPizzaFragment extends TransitionUtil.BaseFragment implements Ini
     }
 
     private boolean validateEditTexts() {
-        if (EditTextValidator.validateEditText(mPizzaNameList, pizzaNameWrapper, mPizzaName)) {
+        if (EditTextValidator.validateEditText(mPizzaNameList, mNameEditTextWrapper, mNameEditText)) {
             return true;
         } else {
             return false;
@@ -113,8 +107,8 @@ public class AddPizzaFragment extends TransitionUtil.BaseFragment implements Ini
 
     public void postPizza() {
         if (isInternetAvailable() && validateEditTexts()) {
-            new DataManager(getActivity()).postPizza(new PostPizza(new Pizza(mPizzaName.getText().toString(),
-                    mPizzaDescription.getText().toString())), new ServiceCallback() {
+            new DataManager(getActivity()).postPizza(new PostPizza(new Pizza(mNameEditText.getText().toString(),
+                    mDescriptionEditText.getText().toString())), new ServiceCallback() {
                 @Override
                 public void onSuccess(Object status, Object response) {
                     if (Integer.parseInt(status.toString()) == AppContants.OK_HTTP_RESPONSE) {
@@ -152,13 +146,13 @@ public class AddPizzaFragment extends TransitionUtil.BaseFragment implements Ini
 
     @Override
     public void onAfterEnter() {
-        animateRevealShow(mMainView);
+        TransitionUtil.animateRevealShow(getActivity(), mMainView);
     }
 
     @Override
     public boolean onBeforeBack() {
         MainActivity.of(getActivity()).animateHomeIcon(MaterialMenuDrawable.IconState.ARROW);
-        animateRevealHide(mMainView);
+        TransitionUtil.animateRevealHide(getActivity(), mMainView);
         return false;
     }
 
@@ -167,64 +161,18 @@ public class AddPizzaFragment extends TransitionUtil.BaseFragment implements Ini
         ViewCompat.setTransitionName(getActivity().findViewById(R.id.fab), "fab");
         TransitionUtil.excludeEnterTarget(getActivity(), R.id.toolbar_container, true);
         TransitionUtil.excludeEnterTarget(getActivity(), R.id.full_screen, true);
-        TransitionUtil.excludeEnterTarget(getActivity(), R.id.overlay, true);
-    }
-
-    public void animateRevealShow(View viewRoot) {
-        View fab = MainActivity.of(getActivity()).getFabButton();
-        int cx = fab.getLeft() + (fab.getWidth() / 2);
-        int cy = fab.getTop() + (fab.getHeight() / 2);
-        int radius = (int) Math.sqrt(Math.pow(cx, 2) + Math.pow(cy, 2));
-
-        Animator anim = ViewAnimationUtils.createCircularReveal(viewRoot, cx, cy, 0, radius);
-        viewRoot.setVisibility(View.VISIBLE);
-        anim.setInterpolator(new DecelerateInterpolator());
-        anim.setDuration(Navigator.ANIM_DURATION);
-        anim.start();
-    }
-
-    public void animateRevealHide(final View viewRoot) {
-        View fab = MainActivity.of(getActivity()).getFabButton();
-        int cx = fab.getLeft() + (fab.getWidth() / 2);
-        int cy = fab.getTop() + (fab.getHeight() / 2);
-        int radius = (int) Math.sqrt(Math.pow(cx, 2) + Math.pow(cy, 2));
-
-        Animator anim = ViewAnimationUtils.createCircularReveal(viewRoot, cx, cy, radius, 0);
-        anim.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-                viewRoot.setVisibility(View.INVISIBLE);
-            }
-        });
-        anim.setInterpolator(new AccelerateInterpolator());
-        anim.setDuration(Navigator.ANIM_DURATION);
-        anim.start();
-
-        Integer colorTo = getResources().getColor(R.color.colorPrimary);
-        Integer colorFrom = getResources().getColor(android.R.color.white);
-        ValueAnimator colorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
-        colorAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animator) {
-                mMainView.setBackgroundColor((Integer) animator.getAnimatedValue());
-            }
-
-        });
-        colorAnimation.setInterpolator(new AccelerateInterpolator(2));
-        colorAnimation.setDuration(Navigator.ANIM_DURATION);
-        colorAnimation.start();
+        TransitionUtil.excludeEnterTarget(getActivity(), R.id.main_view, true);
     }
 
     @Override
     public void init() {
-        initFrontendComponents();
         initBackendComponents();
+        initFrontendComponents();
     }
 
     @Override
     public void initFrontendComponents() {
-        mPizzaNameList = getActivity().getIntent().getStringArrayListExtra(getString(R.string.product_name_list));
+
         initBodyText();
         MainActivity.of(getActivity()).getFabButton().setOnClickListener(new View.OnClickListener() {
             @Override
@@ -233,7 +181,7 @@ public class AddPizzaFragment extends TransitionUtil.BaseFragment implements Ini
             }
         });
 
-        mPizzaName.addTextChangedListener(new TextWatcher() {
+        mNameEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -253,6 +201,6 @@ public class AddPizzaFragment extends TransitionUtil.BaseFragment implements Ini
 
     @Override
     public void initBackendComponents() {
-
+        mPizzaNameList = getActivity().getIntent().getStringArrayListExtra(getString(R.string.product_name_list));
     }
 }

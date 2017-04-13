@@ -48,7 +48,6 @@ public class MainActivity extends TransitionUtil.BaseActivity implements Initial
     @Bind(R.id.base_fragment_background)
     View mFragmentBackground;
 
-
     @Bind(R.id.base_fragment_container)
     CoordinatorLayout mFullScreen;
 

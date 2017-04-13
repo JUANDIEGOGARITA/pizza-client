@@ -23,6 +23,7 @@ import com.example.app.pizzaapp.datamanager.DataManager;
 import com.example.app.pizzaapp.datamanager.ServiceCallback;
 import com.example.app.pizzaapp.model.Pizza;
 import com.example.app.pizzaapp.util.AppContants;
+import com.example.app.pizzaapp.util.Initializer;
 import com.example.app.pizzaapp.util.Navigator;
 import com.example.app.pizzaapp.util.TransitionUtil;
 
@@ -36,15 +37,16 @@ import butterknife.ButterKnife;
  * Created by juandiegoGL on 4/6/17.
  */
 
-public class PizzaListFragment extends TransitionUtil.BaseFragment implements SearchView.OnQueryTextListener {
-    @Bind(R.id.recycler)
-    RecyclerView recyclerView;
+public class PizzaListFragment extends TransitionUtil.BaseFragment implements SearchView.OnQueryTextListener, Initializer {
 
-    @Bind(R.id.refresh_layout)
-    SwipeRefreshLayout mRefreshLayout;
+    @Bind(R.id.recycler_view)
+    RecyclerView mRecyclerView;
+
+    @Bind(R.id.refresh_view)
+    SwipeRefreshLayout mRefreshView;
 
     @Bind(R.id.main_view)
-    RelativeLayout main_view;
+    RelativeLayout mMainView;
 
     @Bind(R.id.empty_view)
     RelativeLayout mEmptyView;
@@ -53,12 +55,12 @@ public class PizzaListFragment extends TransitionUtil.BaseFragment implements Se
     RelativeLayout mErrorView;
 
     @Bind(R.id.error_message)
-    TextView error_message;
+    TextView mErrorMessage;
 
-    PizzaRecyclerAdapter recyclerAdapter;
+    PizzaRecyclerAdapter mRecyclerAdapter;
 
-    List<Pizza> pizzaList;
-    String itemDescription;
+    List<Pizza> mPizzaList;
+
 
     public PizzaListFragment() {
     }
@@ -74,29 +76,18 @@ public class PizzaListFragment extends TransitionUtil.BaseFragment implements Se
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_pizza_list, container, false);
         ButterKnife.bind(this, rootView);
-        pizzaList = new ArrayList<>();
-        itemDescription = getActivity().getIntent().getStringExtra("item_text");
-        initRecyclerView();
-        ((MainActivity) getActivity()).getToolbarTitle().setText(itemDescription);
-        mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                loadPizzas();
-            }
-        });
-        initSearchView();
-        initBodyText();
+        init();
         return rootView;
     }
 
     private void initBodyText() {
-        recyclerView.setAlpha(0);
-        recyclerView.setTranslationY(100);
+        mRecyclerView.setAlpha(0);
+        mRecyclerView.setTranslationY(100);
         MainActivity.of(getActivity()).getFabButton().setAlpha(0.f);
         MainActivity.of(getActivity()).getFabButton().setTranslationY(100);
         new Handler().postDelayed(new Runnable() {
             public void run() {
-                recyclerView.animate()
+                mRecyclerView.animate()
                         .alpha(1)
                         .setStartDelay(Navigator.ANIM_DURATION / 3)
                         .setDuration(Navigator.ANIM_DURATION * 5)
@@ -115,20 +106,20 @@ public class PizzaListFragment extends TransitionUtil.BaseFragment implements Se
     }
 
     private void initRecyclerView() {
-        recyclerAdapter = new PizzaRecyclerAdapter();
-        recyclerAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener<Pizza>() {
+        mRecyclerAdapter = new PizzaRecyclerAdapter();
+        mRecyclerAdapter.setOnItemClickListener(new BaseRecyclerAdapter.OnItemClickListener<Pizza>() {
             @Override
             public void onItemClick(View view, Pizza item, boolean isLongClick) {
                 if (isLongClick) {
                     MainActivity.of(getActivity()).animateHomeIcon(MaterialMenuDrawable.IconState.X);
                 } else {
-                    Navigator.launchDetailProductFragment(MainActivity.of(getActivity()), view, item, recyclerView);
+                    Navigator.launchDetailProductFragment(MainActivity.of(getActivity()), view, item, mRecyclerView);
                 }
             }
         });
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        recyclerView.setAdapter(recyclerAdapter);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mRecyclerView.setAdapter(mRecyclerAdapter);
 
         MainActivity.of(getActivity()).getFabButton().setOnClickListener(new View.OnClickListener() {
             @Override
@@ -141,8 +132,8 @@ public class PizzaListFragment extends TransitionUtil.BaseFragment implements Se
 
     private ArrayList<String> getPizzaNameList() {
         ArrayList<String> pizzaNameList = new ArrayList<>();
-        if (!pizzaList.isEmpty()) {
-            for (Pizza pizza : pizzaList) {
+        if (!mPizzaList.isEmpty()) {
+            for (Pizza pizza : mPizzaList) {
                 pizzaNameList.add(pizza.getName());
             }
         }
@@ -152,7 +143,7 @@ public class PizzaListFragment extends TransitionUtil.BaseFragment implements Se
     @Override
     public void onBeforeViewShows(View contentView) {
         ViewCompat.setTransitionName(((MainActivity) getActivity()).getToolbarTitle(), getString(R.string.title_element));
-        ViewCompat.setTransitionName(main_view, "option_wrapper");
+        ViewCompat.setTransitionName(mMainView, "option_wrapper");
 
         TransitionUtil.excludeEnterTarget(getActivity(), R.id.toolbar_container, true);
         TransitionUtil.excludeEnterTarget(getActivity(), R.id.full_screen, true);
@@ -161,9 +152,8 @@ public class PizzaListFragment extends TransitionUtil.BaseFragment implements Se
     @Override
     public boolean onBeforeBack() {
         MainActivity.of(getActivity()).animateHomeIcon(MaterialMenuDrawable.IconState.ARROW);
-        TransitionUtil.fadeThenFinish(recyclerView, getActivity());
+        TransitionUtil.fadeThenFinish(mRecyclerView, getActivity());
         TransitionUtil.fadeThenFinish(MainActivity.of(getActivity()).getFabButton(), getActivity());
-
         return false;
     }
 
@@ -174,22 +164,22 @@ public class PizzaListFragment extends TransitionUtil.BaseFragment implements Se
 
     public void loadPizzas() {
         if (isInternetAvailable()) {
-            mRefreshLayout.setRefreshing(true);
+            mRefreshView.setRefreshing(true);
             new DataManager(getActivity()).getPizzas(new ServiceCallback() {
                 @Override
                 public void onSuccess(Object status, Object response) {
-                    if (mRefreshLayout.isRefreshing()) {
-                        mRefreshLayout.setRefreshing(false);
+                    if (mRefreshView.isRefreshing()) {
+                        mRefreshView.setRefreshing(false);
                     }
                     mErrorView.setVisibility(View.GONE);
-                    recyclerView.setVisibility(View.VISIBLE);
+                    mRecyclerView.setVisibility(View.VISIBLE);
                     if (Integer.parseInt(status.toString()) == AppContants.OK_HTTP_RESPONSE) {
-                        pizzaList = (List<Pizza>) response;
-                        if (pizzaList.isEmpty()) {
+                        mPizzaList = (List<Pizza>) response;
+                        if (mPizzaList.isEmpty()) {
                             showEmptyView();
                         } else {
                             mEmptyView.setVisibility(View.GONE);
-                            recyclerAdapter.updateList(pizzaList);
+                            mRecyclerAdapter.updateList(mPizzaList);
                         }
                     } else {
                         showErrorView(status.toString() + " " + getString(R.string.internal_server_error));
@@ -213,14 +203,14 @@ public class PizzaListFragment extends TransitionUtil.BaseFragment implements Se
 
 
     public void showErrorView(String message) {
-        recyclerView.setVisibility(View.GONE);
+        mRecyclerView.setVisibility(View.GONE);
         mErrorView.setVisibility(View.VISIBLE);
-        error_message.setText(message);
+        mErrorMessage.setText(message);
     }
 
     private void showEmptyView() {
         mEmptyView.setVisibility(View.VISIBLE);
-        recyclerView.setVisibility(View.GONE);
+        mRecyclerView.setVisibility(View.GONE);
     }
 
     @Override
@@ -252,7 +242,7 @@ public class PizzaListFragment extends TransitionUtil.BaseFragment implements Se
             @Override
             public boolean onClose() {
                 MainActivity.of(getActivity()).getToolbarTitle().setVisibility(View.VISIBLE);
-                recyclerAdapter.updateList(pizzaList);
+                mRecyclerAdapter.updateList(mPizzaList);
                 return false;
             }
         });
@@ -260,7 +250,7 @@ public class PizzaListFragment extends TransitionUtil.BaseFragment implements Se
 
     @Override
     public boolean onQueryTextChange(String query) {
-        recyclerAdapter.updateList(filter(query));
+        mRecyclerAdapter.updateList(filter(query));
         return true;
     }
 
@@ -272,12 +262,37 @@ public class PizzaListFragment extends TransitionUtil.BaseFragment implements Se
     private List<Pizza> filter(String query) {
         query = query.toLowerCase();
         final List<Pizza> filteredModelList = new ArrayList<>();
-        for (Pizza model : pizzaList) {
+        for (Pizza model : mPizzaList) {
             final String text = model.getName().toLowerCase();
             if (text.contains(query)) {
                 filteredModelList.add(model);
             }
         }
         return filteredModelList;
+    }
+
+    @Override
+    public void init() {
+        initBackendComponents();
+        initFrontendComponents();
+    }
+
+    @Override
+    public void initFrontendComponents() {
+        initRecyclerView();
+        ((MainActivity) getActivity()).getToolbarTitle().setText(getActivity().getIntent().getStringExtra("item_text"));
+        mRefreshView.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                loadPizzas();
+            }
+        });
+        initSearchView();
+        initBodyText();
+    }
+
+    @Override
+    public void initBackendComponents() {
+        mPizzaList = new ArrayList<>();
     }
 }

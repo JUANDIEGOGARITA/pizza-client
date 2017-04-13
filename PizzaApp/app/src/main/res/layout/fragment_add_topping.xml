@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/overlay"
+    android:id="@+id/main_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/main_background"
@@ -13,7 +13,7 @@
         android:layout_height="wrap_content">
 
         <ImageView
-            android:id="@+id/pizza_pic"
+            android:id="@+id/topping_pic"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
@@ -22,7 +22,7 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="70dp"
-            android:layout_alignBottom="@+id/pizza_pic"
+            android:layout_alignBottom="@+id/topping_pic"
             android:background="@color/add_topping_title_background">
 
             <android.support.v7.widget.AppCompatTextView
@@ -46,7 +46,7 @@
         android:padding="10dp">
 
         <android.support.v7.widget.AppCompatTextView
-            android:id="@+id/topping_description"
+            android:id="@+id/description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
@@ -54,15 +54,15 @@
             android:textColor="@color/colorAccent" />
 
         <android.support.design.widget.TextInputLayout
-            android:id="@+id/time_wrapper"
+            android:id="@+id/name_edit_text_wrapper"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/topping_description"
+            android:layout_below="@+id/description"
             android:textColorHint="@android:color/white"
             app:hintTextAppearance="@style/TextInputLayout">
 
             <EditText
-                android:id="@+id/topping"
+                android:id="@+id/name_edit_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/colorAccent"
